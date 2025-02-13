@@ -11,12 +11,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+<<<<<<< HEAD
       title: 'TUQuest',
+=======
+      title: 'Flutter Demo',
+>>>>>>> 9415ea5 (Create flutter project)
       theme: ThemeData(
 
         colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 166, 35, 39)),
       ),
+<<<<<<< HEAD
       home: const MyHomePage(title: 'TUQuest'),
+=======
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+>>>>>>> 9415ea5 (Create flutter project)
     );
   }
 }
