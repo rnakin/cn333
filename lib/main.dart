@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:firebase_core/firebase_core.dart';
 
-void main() => runApp(const MyApp());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const Splash());
+}
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Splash extends StatelessWidget {
+  const Splash({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +20,8 @@ class MyApp extends StatelessWidget {
       home: Scaffold(
         body: Center(
           child: Container(
-            width: double.infinity, 
-            height:  double.infinity, 
+            width: double.infinity,
+            height: double.infinity,
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -28,11 +33,10 @@ class MyApp extends StatelessWidget {
               ),
             ),
             child: Center(
-                child: Image.asset(
-                  'image/tuquest_icon.png',//name
-                   width: screenWidth*0.5,
-
-                  ),
+              child: Image.asset(
+                'image/tuquest_icon.png', //name
+                width: screenWidth * 0.5,
+              ),
             ),
           ),
         ),
