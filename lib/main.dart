@@ -1,22 +1,53 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'dart:async'; 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'firebase_option.dart';
+import 'login.dart';
 
-void main() async{
+void main(){
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const Splash());
+  Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
 }
 
-class Splash extends StatelessWidget {
-  const Splash({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'TU Quest',
+      home: Splash(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class Splash extends StatefulWidget {
+  const Splash ({super.key});
+  @override
+  _Splash  createState() => _Splash ();
+}
+
+class _Splash  extends State<Splash > {
+  @override
+  void initState() {
+    super.initState();
+    Timer(
+      Duration(milliseconds: 1500),
+      () => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    const String appTitle = 'Flutter layout demo';
     return MaterialApp(
-      title: appTitle,
+      title: "Splash",
       home: Scaffold(
         body: Center(
           child: Container(
@@ -42,5 +73,31 @@ class Splash extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        body: Center(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  const Color.fromARGB(255, 183, 10, 10),
+                  const Color.fromARGB(255, 0, 0, 0),
+                ],
+                begin: const FractionalOffset(0.0, 1.0),
+                end: const FractionalOffset(0.0, 0.0),
+              ),
+            ),
+            child: Center(
+              child: SignInPage()
+              ),
+            ),
+          ),
+        );
   }
 }
