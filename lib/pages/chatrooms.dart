@@ -5,12 +5,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'login.dart';
 import 'homepage.dart';
 
-class ChatPage extends StatelessWidget {
-  const ChatPage({super.key});
+class ChatRoomsPage extends StatelessWidget {
+  const ChatRoomsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-       if (FirebaseAuth.instance.currentUser == null)  {
+
+    if (FirebaseAuth.instance.currentUser == null)  {
       Future.microtask(
         () => Navigator.pushReplacement(
           context,
@@ -36,7 +37,7 @@ class ChatPage extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-                Text("your are now in chat page"),
+                Text("your are now in chat room page"),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(
