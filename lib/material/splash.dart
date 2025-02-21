@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'firebase_option.dart';
-import 'login.dart';
-import 'homepage.dart';
+import '../firebase_option.dart';
+import '../pages/login.dart';
+import '../pages/homepage.dart';
 
 
 class Splash extends StatefulWidget {
