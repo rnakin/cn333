@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_option.dart';
-import 'homepage.dart';
-import 'login.dart';
+import 'pages/homepage.dart';
+import 'pages/login.dart';
+import 'theme/light_mode.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,22 +23,16 @@ class MyApp extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator()); 
+            return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasData) {
-            return const HomePage(); 
+            return const HomePage();
           } else {
             return const LoginPage();
           }
         },
       ),
-       theme: ThemeData(
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),  // Default text color for large text
-          bodyMedium: TextStyle(color: Color.fromARGB(255, 255, 255, 255)), // Default text color for medium text
-          bodySmall: TextStyle(color: Color.fromARGB(255, 255, 255, 255)),  // Default text color for small text
-        ),
-      ),
+      theme: LightMode,
     );
   }
 }
