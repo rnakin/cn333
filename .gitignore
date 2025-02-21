@@ -105,5 +105,6 @@ app.*.map.json
 *generated*
 generated*
 local*
-macos/Flutter/GeneratedPluginRegistrant.swift
+
 *environment*
+google-services.json

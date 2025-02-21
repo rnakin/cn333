@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class SignInPage extends StatelessWidget {
-  const SignInPage({Key? key}) : super(key: key);
+class LoginPage extends StatelessWidget {
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -69,6 +70,8 @@ class _Logo extends StatelessWidget {
   }
 }
 
+
+
 class _FormContent extends StatefulWidget {
   const _FormContent({Key? key}) : super(key: key);
 
@@ -81,6 +84,15 @@ class __FormContentState extends State<_FormContent> {
   bool _rememberMe = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passController = TextEditingController();
+
+  void  login() async {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+                          email: _emailController.text,
+                          password: _passController.text,);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +108,7 @@ class __FormContentState extends State<_FormContent> {
               validator: (value) {
                 // add email validation
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Cannot be empty';
                 }
 
                 bool emailValid = RegExp(
@@ -107,26 +119,27 @@ class __FormContentState extends State<_FormContent> {
                 }
 
                 return null;
+
               },
+              controller: _emailController,
               decoration: const InputDecoration(
                 labelText: 'Email',
                 hintText: 'Enter your email',
                 prefixIcon: Icon(Icons.email_outlined),
                 border: OutlineInputBorder(),
               ),
+              
             ),
             _gap(),
             TextFormField(
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
+                  return 'Cannot be empty';
                 }
 
-                if (value.length < 6) {
-                  return 'Password must be at least 6 characters';
-                }
                 return null;
               },
+              controller: _passController,
               obscureText: !_isPasswordVisible,
               decoration: InputDecoration(
                 labelText: 'Password',
@@ -180,7 +193,7 @@ class __FormContentState extends State<_FormContent> {
                 ),
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
-                    /// do something
+                        login();
                   }
                 },
               ),
