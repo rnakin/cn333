@@ -4,7 +4,29 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_option.dart';
 import 'pages/homepage.dart';
 import 'pages/login.dart';
-import 'theme/light_mode.dart';
+
+
+ThemeData LightMode = ThemeData(
+  textTheme: const TextTheme(
+  bodyLarge: TextStyle(
+    color: Color.fromARGB(255, 255, 255, 255),
+  ), // Default text color for large text
+  bodyMedium: TextStyle(
+    color: Color.fromARGB(255, 255, 255, 255),
+  ), // Default text color for medium text
+  bodySmall: TextStyle(
+    color: Color.fromARGB(255, 255, 255, 255),
+  ), // Default text color for small text
+ ),
+  colorScheme: ColorScheme.light(
+    surface: Colors.grey.shade50,
+    primary: Colors.grey.shade100,
+    secondary: Colors.grey.shade200,
+    tertiary: Colors.grey.shade400,
+    inversePrimary: Colors.grey.shade600
+
+  )
+);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
