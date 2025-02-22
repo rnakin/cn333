@@ -19,7 +19,7 @@ class ProfileWidget extends StatelessWidget {
       children: [
         // Profile Picture
         CircleAvatar(
-          radius: 50, // Size of profile picture
+          radius: 40, // Size of profile picture
           backgroundImage: user.photoURL != null
               ? NetworkImage(user.photoURL!) // Load profile image from Firebase
               : const AssetImage("assets/default_profile.png") as ImageProvider, // Default profile image
@@ -35,6 +35,68 @@ class ProfileWidget extends StatelessWidget {
     );
   }
 }
+
+
+class ChatProfileBar extends StatelessWidget {
+  const ChatProfileBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // Get the current user
+    User? user = FirebaseAuth.instance.currentUser;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.blue[400], 
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          //Return Arrow Button
+          IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: (){
+               Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePage()),
+    );
+          })
+,
+          // Profile Picture
+
+          CircleAvatar(
+            radius: 15, // Smaller profile size for bar
+            backgroundImage: user?.photoURL != null
+                ? NetworkImage(user!.photoURL!)
+                : const AssetImage("assets/default_profile.png") as ImageProvider,
+          ),
+                    SizedBox(width:10,),
+          //Email Display
+          Expanded(
+            child: Text(
+              user?.email ?? "No Email",
+              style: const TextStyle(fontSize: 16, color: Colors.white),
+              overflow: TextOverflow.ellipsis, // Prevent overflow
+            ),
+          ),
+
+          //Phone Call Icon (Mockup)
+
+        ],
+      ),
+    );
+  }
+}
+
+
 class ProfileWidgetBar extends StatelessWidget {
   const ProfileWidgetBar({super.key});
 
@@ -46,10 +108,10 @@ class ProfileWidgetBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.grey[400], 
+        color: Colors.green[400], 
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black12,
             blurRadius: 5,
             spreadRadius: 2,
           ),
@@ -70,7 +132,7 @@ class ProfileWidgetBar extends StatelessWidget {
 ,
           // Profile Picture
           CircleAvatar(
-            radius: 20, // Smaller profile size for bar
+            radius: 15, // Smaller profile size for bar
             backgroundImage: user?.photoURL != null
                 ? NetworkImage(user!.photoURL!)
                 : const AssetImage("assets/default_profile.png") as ImageProvider,

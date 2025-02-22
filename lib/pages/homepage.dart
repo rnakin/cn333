@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'login.dart';
 import 'chatrooms.dart';
-import 'package:tuquest/widgets/ProfileWidget.dart'; 
+import 'package:tuquest/widgets/profile_widget.dart'; 
+import 'profilepage.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
@@ -37,6 +38,23 @@ class HomePage extends StatelessWidget {
               children: [ProfileWidget()
                 ,
                 Text("you are now loged in"),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ProfilePage()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 0, 0, 255),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 10,
+                    ),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                  child: const Text("Profile"),
+                ),
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(

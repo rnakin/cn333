@@ -6,7 +6,7 @@ import 'pages/homepage.dart';
 import 'pages/login.dart';
 
 
-ThemeData LightMode = ThemeData(
+ThemeData lightMode = ThemeData(
   textTheme: const TextTheme(
   bodyLarge: TextStyle(
     color: Color.fromARGB(255, 255, 255, 255),
@@ -54,7 +54,7 @@ class MyApp extends StatelessWidget {
           }
         },
       ),
-      theme: LightMode,
+      theme: lightMode,
     );
   }
 }
