@@ -57,7 +57,7 @@ class _Logo extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Image.asset(
-          'image/tuquest_icon.png', //name
+          'tuquest_icon.png', //name
           width: isSmallScreen ? 200 : 400,
         ),
         Padding(padding: const EdgeInsets.all(16.0)),
@@ -75,7 +75,6 @@ class _FormContent extends StatefulWidget {
 
 class __FormContentState extends State<_FormContent> {
   bool _isPasswordVisible = false;
-  bool _rememberMe = false;
   bool _wrongPassword = false;
   bool _accountNotFound = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -92,9 +91,6 @@ class __FormContentState extends State<_FormContent> {
       );
 
     } on FirebaseAuthException catch (e) {
-      print("\nthis is e\n");
-      print(e.code);
-      print("\n\n");
       setState(() {
         if (e.code == 'invalid-credential') {
           _errorMessage = 'Invalid email or password.';
@@ -109,7 +105,7 @@ class __FormContentState extends State<_FormContent> {
         context,
         MaterialPageRoute(builder: (context) => const HomePage()),
       );
-    } else {}
+    }
   }
 
   @override

@@ -143,3 +143,7 @@ Runner/GeneratedPluginRegistrant.*
 !default.pbxuser
 !default.perspectivev3
 /image/ios/*
+
+linux/flutter/ephemeral
+linux/flutter/CMakeLists.txt
+linux/flutter/*

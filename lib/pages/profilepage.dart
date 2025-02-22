@@ -3,24 +3,23 @@ import 'login.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'homepage.dart';
 import 'package:tuquest/widgets/profile_widget.dart';
-class ChatRoomsPage extends StatelessWidget {
-  const ChatRoomsPage({super.key});
+
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-
-    if (FirebaseAuth.instance.currentUser == null)  {
+    if (FirebaseAuth.instance.currentUser == null) {
       Future.microtask(
         () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
         ),
       );
-      return const SizedBox(); // Return empty widget 
+      return const SizedBox(); // Return empty widget
     }
 
     return Scaffold(
-      appBar: PreferredSize(preferredSize: Size.fromHeight(25), child: ChatProfileBar()),
       body: Center(
         child: Container(
           decoration: BoxDecoration(
@@ -36,7 +35,9 @@ class ChatRoomsPage extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
-                Text("your are now in chat room page"),
+                ProfileWidget(),
+                Text("your are now in profile page"),
+
                 ElevatedButton(
                   onPressed: () {
                     Navigator.pushReplacement(
@@ -54,7 +55,6 @@ class ChatRoomsPage extends StatelessWidget {
                   ),
                   child: const Text("return"),
                 ),
-                
               ],
             ),
           ),
