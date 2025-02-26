@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'homepage.dart';
-import 'register.dart';
-class LoginPage extends StatelessWidget {
-  const LoginPage({Key? key}) : super(key: key);
+import 'login.dart';
+
+class RegisterPage extends StatelessWidget {
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -77,25 +76,33 @@ class _FormContent extends StatefulWidget {
 
 class __FormContentState extends State<_FormContent> {
   bool _isPasswordVisible = false;
-  bool _wrongPassword = false;
-  bool _accountNotFound = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passController = TextEditingController();
-  String? _errorMessage; 
+  final TextEditingController _passAgainController = TextEditingController();
+  String? _errorMessage;
 
-  void login() async {
+  void createUserViaEmail() async {
+    setState(() {
+      _errorMessage = null;
+    });
+
     try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text,
-        password: _passController.text,
-      );
+      final credential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: _emailController.text,
+            password: _passController.text,
+          );
 
+      // Successfully created user, navigate to HomePage
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        if (e.code == 'invalid-credential') {
-          _errorMessage = 'Invalid email or password.';
+        if (e.code == 'email-already-in-use') {
+          _errorMessage = 'This email is already registered.';
         } else {
           _errorMessage = 'An error occurred. Please try again.';
         }
@@ -122,7 +129,7 @@ class __FormContentState extends State<_FormContent> {
           children: [
             TextFormField(
               validator: (value) {
-                // add email validation
+                //Email
                 if (value == null || value.isEmpty) {
                   return 'Cannot be empty';
                 }
@@ -137,30 +144,42 @@ class __FormContentState extends State<_FormContent> {
                 return null;
               },
               controller: _emailController,
-              
               decoration: const InputDecoration(
                 errorStyle: const TextStyle(
-      color: Colors.red,  
-      fontWeight: FontWeight.bold, 
-    ),
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
                 labelText: 'Email',
                 hintText: 'Enter your email',
                 prefixIcon: Icon(Icons.email_outlined),
                 border: OutlineInputBorder(),
               ),
             ),
+            if (_errorMessage != null)
+              Text(
+                _errorMessage!,
+                style: const TextStyle(color: Colors.red, fontSize: 14),
+              ),
             _gap(),
             TextFormField(
+              //Pass
               validator: (value) {
-                if (_accountNotFound) {
-                  return "Account not found.";
-                }
-                if (_wrongPassword) {
-                  return "Wrong password.";
-                }
-
                 if (value == null || value.isEmpty) {
                   return 'Cannot be empty';
+                }
+                // r'^
+                //   (?=.*[A-Z])       // should contain at least one upper case
+                //   (?=.*[a-z])       // should contain at least one lower case
+                //   (?=.*?[0-9])      // should contain at least one digit
+                //   (?=.*?[!@#\$&*~]) // should contain at least one Special character
+                //   .{8,}             // Must be at least 8 characters in length
+                // $
+                RegExp regex = RegExp(
+                  r'^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$',
+                );
+                bool isGoodPass = regex.hasMatch(value);
+                if (!isGoodPass) {
+                  return 'Password must contain 0-9, a-z, A-z. ';
                 }
 
                 return null;
@@ -169,9 +188,9 @@ class __FormContentState extends State<_FormContent> {
               obscureText: !_isPasswordVisible,
               decoration: InputDecoration(
                 errorStyle: const TextStyle(
-      color: Colors.red,  
-      fontWeight: FontWeight.bold, 
-    ),
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
                 labelText: 'Password',
                 hintText: 'Enter your password',
                 prefixIcon: const Icon(Icons.lock_outline_rounded),
@@ -190,13 +209,44 @@ class __FormContentState extends State<_FormContent> {
                 ),
               ),
             ),
-            if (_errorMessage != null)
-              Text(
-                _errorMessage!,
-                style: const TextStyle(color: Colors.red, fontSize: 14),
-              ),
             _gap(),
-            
+            TextFormField(
+              //PassAgain
+              validator: (value) {
+                if (value != _passController.text) {
+                  return 'Password does not match.';
+                }
+
+                return null;
+              },
+              controller: _passAgainController,
+              obscureText: !_isPasswordVisible,
+              decoration: InputDecoration(
+                errorStyle: const TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+                labelText: 'Password',
+                hintText: 'Enter your password',
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility_off
+                        : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                ),
+              ),
+            ),
+
+            _gap(),
+
             _gap(),
             SizedBox(
               width: double.infinity,
@@ -210,46 +260,47 @@ class __FormContentState extends State<_FormContent> {
                 child: const Padding(
                   padding: EdgeInsets.all(10.0),
                   child: Text(
-                    'Sign in',
+                    'Sign up',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
                 onPressed: () {
                   if (_formKey.currentState?.validate() ?? false) {
-                    login();
+                    createUserViaEmail();
                   }
                 },
               ),
             ),
+            _gap(),
             Column(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text("Don't have an account? "),
-        GestureDetector(
-          onTap: () {
-            // Navigate to Sign Up Page
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const RegisterPage()),
-            );
-          },
-          child: const Text(
-            "Sign Up",
-            style: TextStyle(
-              color: Colors.blue, // Make it look like a link
-              fontWeight: FontWeight.bold,
-              decoration: TextDecoration.underline,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Already have Accounts? "),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                        );
+                      },
+                      child: const Text(
+                        "Sign in",
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
-          ),
-        ),
-      ],
-    ),
-  ],
-)
-
           ],
         ),
       ),
