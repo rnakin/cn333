@@ -1,37 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'firebase_option.dart';
-import 'pages/homepage.dart';
-import 'pages/login.dart';
-
-
-ThemeData lightMode = ThemeData(
-  textTheme: const TextTheme(
-  bodyLarge: TextStyle(
-    color: Color.fromARGB(255, 255, 255, 255),
-  ), // Default text color for large text
-  bodyMedium: TextStyle(
-    color: Color.fromARGB(255, 255, 255, 255),
-  ), // Default text color for medium text
-  bodySmall: TextStyle(
-    color: Color.fromARGB(255, 255, 255, 255),
-  ), // Default text color for small text
- ),
-  colorScheme: ColorScheme.light(
-    surface: Colors.grey.shade50,
-    primary: Colors.grey.shade100,
-    secondary: Colors.grey.shade200,
-    tertiary: Colors.grey.shade400,
-    inversePrimary: Colors.grey.shade600
-
-  )
-);
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-=======
 import 'dart:async'; 
 import 'package:google_fonts/google_fonts.dart'; 
 import 'screens/login.dart';
@@ -109,7 +76,6 @@ class SplashPageState extends State<SplashPage> {
           ),
         ),
       ),
->>>>>>> frontend
     );
   }
 }
