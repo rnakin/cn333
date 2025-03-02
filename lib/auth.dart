@@ -1,7 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 
 class TQauth {
-
+   static Future<void> logout() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    } catch (e) {
+      print("Error signing out: $e");
+    }
+  }
 
   static Future<UserCredential> loginViaEmail(String email, String password) async {
     try {
@@ -17,4 +23,5 @@ class TQauth {
       throw Exception(e);
     }
   }
+
 }
