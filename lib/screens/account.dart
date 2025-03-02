@@ -4,7 +4,8 @@ import 'dart:io';
 import 'edit.dart';
 import 'package:tuquest/widgets/bottom_nav.dart';
 import 'contact.dart';
-
+import 'package:tuquest/auth.dart';
+import 'package:tuquest/screens/login.dart';
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
 
@@ -161,9 +162,9 @@ class _AccountPageState extends State<AccountPage> {
                   MaterialPageRoute(
                     builder: (context) => const ContactScreen(),
                   ),
-                );  
+                );
               }),
-                
+
               const SizedBox(height: 30),
 
               // Logout Button
@@ -173,10 +174,19 @@ class _AccountPageState extends State<AccountPage> {
                 height: 50,
 
                 child: ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: () async {
+                    await TQauth.logout();
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text("Logged out successfully!")),
                     );
+                                   Navigator.push(
+                  context,
+
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(),
+                  ),
+                );
+
                   },
 
                   icon: const Icon(Icons.logout, color: Colors.white),
