@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:async'; 
 import 'package:google_fonts/google_fonts.dart'; 
 import 'screens/login.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -35,8 +40,7 @@ class SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    // เปลี่ยนไปหน้า login หลัง 5 วิ
-    Timer(const Duration(seconds: 5), () {
+    Timer(const Duration(milliseconds: 1500), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const LoginPage()),
