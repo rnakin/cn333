@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'tualert.dart';
 import 'eventboard.dart';
-import 'questboard.dart';
+import "quest_page.dart";
 import 'package:tuquest/widgets/bottom_nav.dart'; // เรียกใช้ Bottom Navigation
  
 class HomeScreen extends StatelessWidget {
@@ -60,7 +60,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 20),
  
               // ปุ่ม Quest
-              _buildButton(context, "Quest", const QuestBoardPage()),
+              _buildButton(context, "Quest", const QuestPage()),
             ],
           ),
         ),
