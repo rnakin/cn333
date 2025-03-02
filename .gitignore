@@ -81,15 +81,13 @@ doc/api/
 *.js.deps
 *.js.map
 
->>>>>>> 1a25dbb (Create flutter project)
->>>>>>> 0463cb9 (Create flutter project)
->>>>>>> 6c9f5f8 (Create flutter project)
+
 .flutter-plugins
 .flutter-plugins-dependencies
-<<<<<<< HEAD
 
 ## PRIVATE
 lib/firebase_option.dart
+lib/firebase_options.dart
 s.dart
 
 gradle-wrapper.jar
@@ -264,6 +262,7 @@ app.*.map.json
 *generated*
 generated*
 local*
+local/*
 
 *environment*
 google-services.json
@@ -309,3 +308,4 @@ linux/flutter/*
 =======
 >>>>>>> d949be7 (update working dir)
 >>>>>>> frontend
+firebase.json
