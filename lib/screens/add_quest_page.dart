@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import "package:tuquest/models/quest.dart";
+import 'package:cloud_firestore_platform_interface/src/timestamp.dart';
+import 'package:uuid/uuid.dart';
 
 class AddQuestPage extends StatefulWidget {
-  final Function(Quest) onQuestAdded;
-
-  AddQuestPage({required this.onQuestAdded});
-
   @override
   _AddQuestPageState createState() => _AddQuestPageState();
 }
@@ -28,19 +26,21 @@ class _AddQuestPageState extends State<AddQuestPage> {
     }
   }
 
-  void _submitQuest() {
-    if (_titleController.text.isNotEmpty &&
-        _descriptionController.text.isNotEmpty) {
-      widget.onQuestAdded(
-        Quest(
-          title: _titleController.text,
-          description: _descriptionController.text,
-          imagePath: _image?.path ?? '',
-        ),
-      );
-      Navigator.pop(context); // Go back to the Quest Page
-    }
+void _submitQuest() async {
+  if (_titleController.text.isNotEmpty && _descriptionController.text.isNotEmpty) {
+    await Quest.addQuest(
+      _titleController.text,
+      _descriptionController.text,
+      imagePath: _image?.path, // Pass image path if available
+    );
+
+    Navigator.pop(context,true); // Go back to Quest Page
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please provide both a title and a description.")),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {

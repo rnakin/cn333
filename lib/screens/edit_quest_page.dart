@@ -24,9 +24,9 @@ class _EditQuestPageState extends State<EditQuestPage> {
     _descriptionController = TextEditingController(
       text: widget.quest.description,
     );
-    if (widget.quest.imagePath.isNotEmpty) {
-      _image = File(widget.quest.imagePath);
-    }
+    if (widget.quest.imagePath != null && widget.quest.imagePath!.isNotEmpty) {
+  _image = File(widget.quest.imagePath!);
+}
   }
 
   Future<void> _pickImage() async {
@@ -40,20 +40,25 @@ class _EditQuestPageState extends State<EditQuestPage> {
     }
   }
 
-  void _saveChanges() {
-    if (_titleController.text.isNotEmpty &&
-        _descriptionController.text.isNotEmpty) {
-      Quest updatedQuest = Quest(
-        title: _titleController.text,
-        description: _descriptionController.text,
-        imagePath:
-            _image?.path ??
-            widget.quest.imagePath, // Keep old image if not changed
-      );
-      Navigator.pop(context, updatedQuest);
-    }
-  }
+ void _saveChanges() {
+  if (_titleController.text.isNotEmpty && _descriptionController.text.isNotEmpty) {
+    // Create an updated Quest using copyWith to update only the changed fields.
+    Quest updatedQuest = widget.quest.copyWith(
+      title: _titleController.text,
+      description: _descriptionController.text,
+      imagePath: _image?.path ?? widget.quest.imagePath, // Keep old image if not changed.
+      // Optionally update timestamp: timestamp: Timestamp.now(),
+    );
 
+    // Pop with the updated quest so the previous page can refresh its data.
+    Navigator.pop(context, updatedQuest);
+  } else {
+    // Optionally, show a snackbar if fields are empty.
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please fill in all fields')),
+    );
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(

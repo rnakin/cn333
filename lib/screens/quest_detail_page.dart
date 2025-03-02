@@ -45,11 +45,11 @@ class _QuestDetailPageState extends State<QuestDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            widget.quest.imagePath.isNotEmpty
-                ? Image.file(File(widget.quest.imagePath), height: 150)
-                : Icon(Icons.image, size: 150), // Default icon
+            widget.quest.imagePath?.isNotEmpty == true
+    ? Image.file(File(widget.quest.imagePath!), height: 150)
+    : Icon(Icons.image, size: 150),
             SizedBox(height: 10),
-            Text(widget.quest.description, style: TextStyle(fontSize: 16)),
+            Text(widget.quest.description??'', style: TextStyle(fontSize: 16)),
           ],
         ),
       ),
