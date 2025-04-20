@@ -1,0 +1,105 @@
+{
+  "project_info": {
+    "project_number": "547061810454",
+    "project_id": "tuquest-a0507",
+    "storage_bucket": "tuquest-a0507.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547061810454:android:fc1deaadcab97388957c37",
+        "android_client_info": {
+          "package_name": "com.example.tuquest"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "547061810454-krgqjifjt0akb6sdp9rnvejsja2h34s9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTLfzWJvBDQvFdpyCybLUJnrgpJ5UYvWA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "547061810454-krgqjifjt0akb6sdp9rnvejsja2h34s9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547061810454:android:23c61a70d58fd8a8957c37",
+        "android_client_info": {
+          "package_name": "com.example.tuquest_event_new"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "547061810454-krgqjifjt0akb6sdp9rnvejsja2h34s9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTLfzWJvBDQvFdpyCybLUJnrgpJ5UYvWA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "547061810454-krgqjifjt0akb6sdp9rnvejsja2h34s9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:547061810454:android:c8d289d0be62326d957c37",
+        "android_client_info": {
+          "package_name": "tuquest.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "547061810454-9gfnmsvpne15pq6qf2cl2epntp2ostt6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "tuquest.app",
+            "certificate_hash": "c4b3f1552cf7c12b1a938a1bb22c99c270ab8f65"
+          }
+        },
+        {
+          "client_id": "547061810454-krgqjifjt0akb6sdp9rnvejsja2h34s9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBTLfzWJvBDQvFdpyCybLUJnrgpJ5UYvWA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "547061810454-krgqjifjt0akb6sdp9rnvejsja2h34s9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
