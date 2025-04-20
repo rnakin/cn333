@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'firebase_options.dart';
-import 'screens/login.dart';
-import 'screens/home.dart'; 
+import 'dart:async';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:provider/provider.dart';
+
+import 'screens_v2/home/home.dart';
+import 'screens_v2/login.dart';
+import 'screens_v2/providers/fav_provider.dart';
+import 'screens_v2/providers/navbar_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +43,7 @@ class MyApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ),
       ),
-      home: isLoggedIn ? const Home() : const LoginPage(),
+      home: isLoggedIn ? const HomePage() : const LoginPage(),
     );
   }
 }

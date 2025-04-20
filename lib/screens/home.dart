@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tuquest/widgets/navbar.dart';
-import 'package:tuquest/screens/account.dart';
+import 'package:tuquest/screens_v2/account.dart';
 import 'package:tuquest/screens/qr.dart';
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 

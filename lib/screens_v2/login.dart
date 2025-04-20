@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import './home/home.dart';
+import 'package:tuquest/auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tuquest/material/validator.dart';
+
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,16 +15,21 @@ class LoginPage extends StatefulWidget {
 
 class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  bool _obscurePassword = true;
+  final _emailController = TextEditingController();
+  final _passController = TextEditingController();
 
-  late AnimationController _animationController; // เปลี่ยนชื่อตัวแปรให้ตรงกัน
+  bool _obscurePassword = true;
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  late AnimationController _animationController;
   late Animation<Offset> _slideAnimation;
 
   @override
   void initState() {
     super.initState();
 
-    _animationController = AnimationController( // ใช้ชื่อ _animationController แทน _controller
+    _animationController = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
@@ -29,24 +38,49 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
       begin: const Offset(0, 1),
       end: Offset.zero,
     ).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack), // เปลี่ยนเป็น _animationController
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutBack),
     );
 
-    _animationController.forward(); // เปลี่ยนเป็น _animationController
+    _animationController.forward();
   }
 
   @override
   void dispose() {
-    _animationController.dispose(); // เปลี่ยนเป็น _animationController
+    _animationController.dispose();
+    _emailController.dispose();
+    _passController.dispose();
     super.dispose();
   }
 
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      await TQauth.loginViaEmail(
+        _emailController.text.trim(),
+        _passController.text.trim(),
+      );
+
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
+        MaterialPageRoute(builder: (_) => const HomePage()),
       );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        _errorMessage = (e.code == 'invalid-credential')
+            ? 'Invalid email or password.'
+            : 'An error occurred. Please try again.';
+      });
+    } catch (_) {
+      setState(() => _errorMessage = 'Unexpected error occurred.');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -58,44 +92,44 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
         children: [
           // Welcome Text
           Positioned(
-  top: 120,
-  left: 33,
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        'Hello!',
-        style: GoogleFonts.montserrat(
-          fontSize: 50,
-          fontWeight: FontWeight.w900,
-          color: const Color(0xFFA00000),
-        ),
-      ),
-      Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: 'Welcome to ',
-              style: GoogleFonts.montserrat(
-                fontSize: 23,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
+            top: 120,
+            left: 33,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hello!',
+                  style: GoogleFonts.montserrat(
+                    fontSize: 50,
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFFA00000),
+                  ),
+                ),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Welcome to ',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 23,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'NotiTU',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 25,
+                          fontWeight: FontWeight.w900,
+                          color: const Color(0xFFA00000),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            TextSpan(
-              text: 'NotiTU',
-              style: GoogleFonts.montserrat(
-                fontSize: 25,
-                fontWeight: FontWeight.w900,
-                color: const Color(0xFFA00000),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
-),
+          ),
 
           // White Slide Container
           SlideTransition(
@@ -127,7 +161,7 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                       ),
                       const SizedBox(height: 38),
 
-                      // Student ID Field
+                      // Student ID
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -140,6 +174,8 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
+                            controller: _emailController,
+                            validator: Validator.studentID,
                             decoration: InputDecoration(
                               hintText: 'Enter your student ID',
                               hintStyle: TextStyle(color: Colors.grey[500]),
@@ -149,23 +185,15 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                               ),
                               filled: true,
                               fillColor: Colors.grey[100],
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14),
-                              prefixIcon: Icon(Icons.person_outline, 
-                                color: Colors.grey[600]),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              prefixIcon: Icon(Icons.person_outline, color: Colors.grey[600]),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your student ID';
-                              }
-                              return null;
-                            },
                           ),
                         ],
                       ),
                       const SizedBox(height: 25),
 
-                      // Password Field
+                      // Password
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -178,6 +206,8 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
+                            controller: _passController,
+                            validator: Validator.password,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
                               hintText: 'Enter your password',
@@ -188,57 +218,60 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                               ),
                               filled: true,
                               fillColor: Colors.grey[100],
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14),
-                              prefixIcon: Icon(Icons.lock_outline, 
-                                color: Colors.grey[600]),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[600]),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword 
-                                    ? Icons.visibility_off 
-                                    : Icons.visibility,
+                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
                                   color: Colors.grey[600],
                                 ),
                                 onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
+                                  setState(() => _obscurePassword = !_obscurePassword);
                                 },
                               ),
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
-                              }
-                              return null;
-                            },
                           ),
                         ],
                       ),
-                      const SizedBox(height: 43),
+
+                      if (_errorMessage != null) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ],
+
+                      const SizedBox(height: 32),
 
                       // Login Button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF9D00),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onPressed: _submitForm,
-                          child: Text(
-                            'Login',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      )
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFF9D00),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                onPressed: _submitForm,
+                                child: Text(
+                                  'Login',
+                                  style: GoogleFonts.montserrat(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                     
                     ],
                   ),
                 ),
