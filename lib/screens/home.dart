@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tuquest/screens/schedule_screen.dart';
 import 'package:tuquest/widgets/navbar.dart';
 import 'package:tuquest/screens/account.dart';
 import 'package:tuquest/screens/qr.dart';
+
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -39,7 +41,7 @@ class _HomeState extends State<Home> {
         onPageChanged: _onPageChanged,
         children: [
           const Center(child: QrPage()),
-          const Center(child: SizedBox.shrink()),
+          const Center(child: ScheduleScreen()),
           const Center(child: AccountPage()),
         ],
       ),
