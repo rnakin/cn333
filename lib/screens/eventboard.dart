@@ -110,10 +110,20 @@ class _EventBoardPageState extends State<EventBoardPage> {
       borderRadius: BorderRadius.circular(12),
       splashColor: const Color.fromARGB(255, 255, 255, 255),
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => AddEventPage()),
-        );
+        final user = FirebaseAuth.instance.currentUser;
+        final email = user?.email ?? '';
+
+        if (email.endsWith('@tuquest.com')) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddEventPage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Access Denied.')),
+          );
+        }
+        
       },
       child: const Padding(
         padding: EdgeInsets.all(8.0),
