@@ -15,8 +15,9 @@ class EventBoardPage extends StatefulWidget {
 }
 
 class _EventBoardPageState extends State<EventBoardPage> {
-  DateTime _selectedDay = DateTime.now();
-
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay = DateTime.now();
+  
   // กำหนดข้อมูลกิจกรรมแบบแมนนวล (ในอนาคตจะดึงจาก Firestore)
   final Map<DateTime, List<Map<String, String>>> _events = {
     DateTime(2025, 2, 2): [
@@ -36,69 +37,44 @@ class _EventBoardPageState extends State<EventBoardPage> {
       body: Stack(
         children: [
           _buildBackground(),
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 80),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      "Event",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w800,
+                        foreground: Paint()
+                          ..shader = const LinearGradient(
+                            colors: [Color(0xFFA00000), Color(0xFFFF8000)],
+                          ).createShader(const Rect.fromLTWH(0, 0, 200, 50)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
 
-          Positioned(
-            top: 80,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                "Event",
-                style: GoogleFonts.montserrat(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w800,
-                  foreground: Paint()
-                    ..shader = const LinearGradient(
-                      colors: [Color(0xFFA00000), Color(0xFFFF8000)],
-                    ).createShader(const Rect.fromLTWH(0, 0, 200, 50)),
-                ),
+                  _buildAnnouncement(context),
+                  const SizedBox(height: 20),
+
+                  _buildCalendar(),
+                  const SizedBox(height: 20),
+
+                  Text("This month", style: _headerTextStyle()),
+                  const SizedBox(height: 10),
+
+                  ..._buildEventCards(context),
+                  const SizedBox(height: 80), // extra space for bottom nav
+                ],
               ),
-            ),
-          ),
-
-          //
-          // Announcement
-          //
-          Positioned(
-            top: 140,
-            left: 20,
-            right: 20,
-            child: _buildAnnouncement(context),
-          ),
-
-          // Positioned(
-          //   top: 140 + 300,
-          //   left: 20,
-          //   right: 20,
-          //   child: _buildAnnouncement2(context),
-          // ),
-
-          Positioned(
-            top: 130 + 260,
-            left: 20,
-            right: 20,
-            child: _buildCalendar(),
-          ),
-
-          Positioned(
-            top: 400,
-            left: 20,
-            child: Text("This month", style: _headerTextStyle()),
-          ),
-
-          Positioned(
-            top: 430,
-            left: 20,
-            right: 20,
-            child: Column(
-              children: _buildEventCards(context),
             ),
           ),
         ],
       ),
-      ///////////////////////////////////////
-      /// ANNOUNCEMENT
-      ////////////////////////////////////////
 
       floatingActionButton: InkWell(
             borderRadius: BorderRadius.circular(12), // ripple effect rounded
@@ -147,7 +123,7 @@ class _EventBoardPageState extends State<EventBoardPage> {
     ////////////////////////////////////////////////////////
     Widget _buildAnnouncement(BuildContext context) {
       return Container(
-        width: 300,
+        width: MediaQuery.of(context).size.width - 40,
         height: 180,
         padding: EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -160,8 +136,11 @@ class _EventBoardPageState extends State<EventBoardPage> {
     ///////////////////////////////////////////////////////////////////
 
   Widget _buildCalendar() {
+    // DateTime _focusedDay = DateTime.now();
+    // DateTime? _selectedDay;
+
     return TableCalendar(
-      focusedDay: DateTime.now(),
+      focusedDay: _focusedDay,
       firstDay: DateTime.utc(2024, 1, 1),
       lastDay: DateTime.utc(2030, 12, 31),
       calendarStyle: CalendarStyle(
@@ -173,6 +152,7 @@ class _EventBoardPageState extends State<EventBoardPage> {
       onDaySelected: (selectedDay, focusedDay) {
         setState(() {
           _selectedDay = selectedDay;
+          _focusedDay = focusedDay; 
         });
       },
       eventLoader: (day) {
@@ -181,10 +161,17 @@ class _EventBoardPageState extends State<EventBoardPage> {
     );
   }
 
-  List<Widget> _buildEventCards(BuildContext context) {
-    if (!_events.containsKey(_selectedDay)) return [];
+  DateTime _normalizeDate(DateTime date) {
+    return DateTime(date.year, date.month, date.day);
+  }
 
-    return _events[_selectedDay]!.map((event) {
+  List<Widget> _buildEventCards(BuildContext context) {
+
+    final selectedDayKey = _normalizeDate(_selectedDay!);
+    
+    if (!_events.containsKey(selectedDayKey)) return [];
+
+    return _events[selectedDayKey]!.map((event) {
       return GestureDetector(
         onTap: () {
           Navigator.push(
@@ -203,7 +190,7 @@ class _EventBoardPageState extends State<EventBoardPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "${_selectedDay.day} Feb",
+                  "${_selectedDay?.day} Feb",
                   style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
