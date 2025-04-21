@@ -15,9 +15,20 @@ class EventModel {
     required this.description,
     required this.startDate,
     required this.endDate,
-    required this.createdBy,
     this.imageUrl,
+    required this.createdBy,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'description': description,
+      'startDate': startDate,
+      'endDate': endDate,
+      'imageUrl': imageUrl,
+      'createdBy': createdBy,
+    };
+  }
 
   factory EventModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -30,16 +41,5 @@ class EventModel {
       imageUrl: data['imageUrl'],
       createdBy: data['createdBy'] ?? '',
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'title': title,
-      'description': description,
-      'startDate': startDate,
-      'endDate': endDate,
-      'imageUrl': imageUrl,
-      'createdBy': createdBy,
-    };
   }
 }

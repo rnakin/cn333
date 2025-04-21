@@ -1,35 +1,22 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/event_model.dart';
 
 class AddEditEventPage extends StatefulWidget {
-  final String? eventId;
-  final String? initialTitle;
-  final String? initialDescription;
-  final DateTime? initialStart;
-  final DateTime? initialEnd;
-  final String? initialImageUrl;
-  final String? initialImageFilePath;
-  final void Function({
+  final EventModel? event;
+  final Future<void> Function({
     required String title,
     required String description,
     required DateTime start,
     required DateTime end,
     String? imageUrl,
-    String? imageFilePath,
   }) onSave;
 
   const AddEditEventPage({
     super.key,
-    this.eventId,
-    this.initialTitle,
-    this.initialDescription,
-    this.initialStart,
-    this.initialEnd,
-    this.initialImageUrl,
-    this.initialImageFilePath,
-    required this.onSave, required String currentUserId,
+    this.event,
+    required this.onSave,
   });
 
   @override
@@ -39,131 +26,114 @@ class AddEditEventPage extends StatefulWidget {
 class _AddEditEventPageState extends State<AddEditEventPage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
-  late TextEditingController _descController;
+  late TextEditingController _descriptionController;
   late TextEditingController _imageUrlController;
   DateTime? _startDate;
   DateTime? _endDate;
-  File? _pickedImage;
+  File? _selectedImageFile;
 
   @override
   void initState() {
     super.initState();
-    _titleController = TextEditingController(text: widget.initialTitle);
-    _descController = TextEditingController(text: widget.initialDescription);
-    _imageUrlController = TextEditingController(text: widget.initialImageUrl);
-    _startDate = widget.initialStart ?? DateTime.now();
-    _endDate = widget.initialEnd ?? DateTime.now().add(const Duration(hours: 1));
+    _titleController = TextEditingController(text: widget.event?.title ?? '');
+    _descriptionController = TextEditingController(text: widget.event?.description ?? '');
+    _imageUrlController = TextEditingController(text: widget.event?.imageUrl ?? '');
+    _startDate = widget.event?.startDate ?? DateTime.now();
+    _endDate = widget.event?.endDate ?? DateTime.now().add(const Duration(hours: 1));
   }
 
   Future<void> _pickImageFromGallery() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
-      setState(() {
-        _pickedImage = File(picked.path);
-        _imageUrlController.clear();
-      });
+      setState(() => _selectedImageFile = File(picked.path));
     }
   }
 
-  Future<void> _pickDateTime({required bool isStart}) async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: isStart ? _startDate! : _endDate!,
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
+  void _save() {
+    if (_formKey.currentState?.validate() != true || _startDate == null || _endDate == null) return;
+
+    widget.onSave(
+      title: _titleController.text.trim(),
+      description: _descriptionController.text.trim(),
+      start: _startDate!,
+      end: _endDate!,
+      imageUrl: _imageUrlController.text.trim().isNotEmpty
+          ? _imageUrlController.text.trim()
+          : _selectedImageFile?.path,
     );
 
-    if (date == null) return;
-
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(isStart ? _startDate! : _endDate!),
-    );
-
-    if (time == null) return;
-
-    final dateTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-    setState(() {
-      if (isStart) {
-        _startDate = dateTime;
-      } else {
-        _endDate = dateTime;
-      }
-    });
-  }
-
-  void _submit() {
-    if (_formKey.currentState?.validate() ?? false) {
-      widget.onSave(
-        title: _titleController.text,
-        description: _descController.text,
-        start: _startDate!,
-        end: _endDate!,
-        imageUrl: _imageUrlController.text.isNotEmpty ? _imageUrlController.text : null,
-        imageFilePath: _pickedImage?.path,
-      );
-      Navigator.pop(context);
-    }
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final imageToShow = _pickedImage != null
-        ? Image.file(_pickedImage!, height: 200)
-        : (_imageUrlController.text.isNotEmpty
-            ? Image.network(_imageUrlController.text, height: 200)
-            : null);
-
     return Scaffold(
-      appBar: AppBar(title: Text(widget.eventId == null ? 'Add Event' : 'Edit Event')),
+      appBar: AppBar(title: Text(widget.event == null ? 'Add Event' : 'Edit Event')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-                validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+                decoration: const InputDecoration(labelText: 'Event Title'),
+                validator: (value) => value!.isEmpty ? 'Please enter title' : null,
               ),
               TextFormField(
-                controller: _descController,
+                controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Description'),
               ),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: ListTile(
-                      title: Text('Start: ${_startDate.toString().substring(0, 16)}'),
-                      onTap: () => _pickDateTime(isStart: true),
-                    ),
-                  ),
-                  Expanded(
-                    child: ListTile(
-                      title: Text('End: ${_endDate.toString().substring(0, 16)}'),
-                      onTap: () => _pickDateTime(isStart: false),
-                    ),
-                  ),
-                ],
+              ListTile(
+                title: const Text('Start Date'),
+                subtitle: Text('${_startDate?.toLocal()}'.split(' ')[0]),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _startDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) setState(() => _startDate = picked);
+                },
+              ),
+              ListTile(
+                title: const Text('End Date'),
+                subtitle: Text('${_endDate?.toLocal()}'.split(' ')[0]),
+                trailing: const Icon(Icons.calendar_today),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _endDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) setState(() => _endDate = picked);
+                },
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _imageUrlController,
                 decoration: const InputDecoration(labelText: 'Image URL (optional)'),
               ),
-              TextButton.icon(
-                icon: const Icon(Icons.image),
-                label: const Text("Pick from Gallery"),
+              const SizedBox(height: 10),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.photo),
+                label: const Text('Pick Image from Gallery'),
                 onPressed: _pickImageFromGallery,
               ),
-              if (imageToShow != null) imageToShow,
+              const SizedBox(height: 16),
+              if (_selectedImageFile != null)
+                Image.file(_selectedImageFile!, height: 200, fit: BoxFit.cover),
+              if (_imageUrlController.text.isNotEmpty)
+                Image.network(_imageUrlController.text, height: 200, fit: BoxFit.cover),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _submit,
-                child: const Text('Save Event'),
-              )
+                onPressed: _save,
+                child: const Text('Save'),
+              ),
             ],
           ),
         ),
