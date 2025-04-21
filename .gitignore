@@ -126,7 +126,7 @@ google-services.json
 lib/firebase_option.dart
 lib/firebase_options.dart
 s.dart
-
+secret.dart
 # ===========================
 # Other Flutter Artifacts
 # ===========================
