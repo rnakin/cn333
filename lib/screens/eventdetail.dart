@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tuquest/widgets/bottom_nav.dart';
 
 class EventDetailScreen extends StatelessWidget {
-  final Map<String, String> eventData;
+  final Map<String, dynamic> eventData;
 
   const EventDetailScreen({super.key, required this.eventData});
 
@@ -48,12 +48,17 @@ class EventDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Text("${eventData['title']}", style: _titleTextStyle()),
-                  Image.asset(eventData["image"]!, height: 150, fit: BoxFit.cover),
-                  Text(eventData["time"]!, style: _infoTextStyle()),
+                  eventData["imgPath"] != null && eventData["imgPath"]!.isNotEmpty
+                ? Image.network(
+                    eventData["imgPath"]!,
+                    height: 200,
+                    errorBuilder: (context, error, stackTrace) => SizedBox(),
+                  ): SizedBox(),
+                  Text(eventData["time"], style: _infoTextStyle()),
                   Text(eventData["location"]!, style: _infoTextStyle()),
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(eventData["description"]!, style: _descTextStyle()),
+                    child: Text(eventData["description"], style: _descTextStyle()),
                   ),
                 ],
               ),
@@ -77,7 +82,7 @@ class EventDetailScreen extends StatelessWidget {
     );
   }
 
-  TextStyle _titleTextStyle() => GoogleFonts.montserrat(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white);
-  TextStyle _infoTextStyle() => GoogleFonts.montserrat(fontSize: 16, color: Colors.white);
-  TextStyle _descTextStyle() => GoogleFonts.montserrat(fontSize: 14, color: Colors.white);
+  TextStyle _titleTextStyle() => GoogleFonts.montserrat(fontSize: 24, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 0, 0, 0));
+  TextStyle _infoTextStyle() => GoogleFonts.montserrat(fontSize: 16, color: const Color.fromARGB(255, 0, 0, 0));
+  TextStyle _descTextStyle() => GoogleFonts.montserrat(fontSize: 14, color: const Color.fromARGB(255, 0, 0, 0));
 }

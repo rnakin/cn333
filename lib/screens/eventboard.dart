@@ -6,6 +6,7 @@ import 'package:tuquest/widgets/bottom_nav.dart';
 import 'eventdetail.dart';
 import 'package:tuquest/widgets/announcement_box.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EventBoardPage extends StatefulWidget {
   const EventBoardPage({super.key});
@@ -67,7 +68,7 @@ class _EventBoardPageState extends State<EventBoardPage> {
                   Text("This month", style: _headerTextStyle()),
                   const SizedBox(height: 10),
 
-                  ..._buildEventCards(context),
+                  _buildEventCards(context),
                   const SizedBox(height: 80), // extra space for bottom nav
                 ],
               ),
@@ -165,60 +166,108 @@ class _EventBoardPageState extends State<EventBoardPage> {
     return DateTime(date.year, date.month, date.day);
   }
 
-  List<Widget> _buildEventCards(BuildContext context) {
-
+  // List<Widget> _buildEventCards(BuildContext context) {
+  // final selectedDayKey = _normalizeDate(_selectedDay!);
+  
+  Widget _buildEventCards(BuildContext context) {
     final selectedDayKey = _normalizeDate(_selectedDay!);
-    
-    if (!_events.containsKey(selectedDayKey)) return [];
 
-    return _events[selectedDayKey]!.map((event) {
-      return GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => EventDetailScreen(eventData: event),
-            ),
-          );
-        },
-        child: Card(
-          color: Colors.orange.shade300,
-          margin: const EdgeInsets.symmetric(vertical: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "${_selectedDay?.day} Feb",
-                  style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.bold),
+    final DateTime startOfDay = DateTime(
+      selectedDayKey.year,
+      selectedDayKey.month,
+      selectedDayKey.day,
+    );
+
+    final DateTime endOfDay = DateTime(
+      selectedDayKey.year,
+      selectedDayKey.month,
+      selectedDayKey.day,
+      23,
+      59,
+      59,
+      999,
+    );
+
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('events')
+          .where('date', isGreaterThanOrEqualTo: startOfDay)
+          .where('date', isLessThanOrEqualTo: endOfDay)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Text("Error: ${snapshot.error}");
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Text("No events for this day.");
+        }
+
+        final events = snapshot.data!.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+
+        const List<String> monthNames = [
+          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
+
+        String monthAbbreviation = monthNames[_selectedDay!.month - 1];
+
+        return Column(
+          children: events.map((event) {
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EventDetailScreen(eventData: event),
+                  ),
+                );
+              },
+              child: Card(
+                color: Colors.orange.shade300,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${_selectedDay?.day} $monthAbbreviation ${_selectedDay?.year}",
+                        style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        event["title"] ?? "No Title",
+                        style: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time, size: 16, color: Colors.black54),
+                          const SizedBox(width: 4),
+                          Text(event["time"] ?? "No Time", style: const TextStyle(color: Colors.black54)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.location_on, size: 16, color: Colors.black54),
+                          const SizedBox(width: 4),
+                          Text(event["location"] ?? "No Location", style: const TextStyle(color: Colors.black54)),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  event["title"]!,
-                  style: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    const Icon(Icons.access_time, size: 16, color: Colors.black54),
-                    const SizedBox(width: 4),
-                    Text(event["time"]!, style: const TextStyle(color: Colors.black54)),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.location_on, size: 16, color: Colors.black54),
-                    const SizedBox(width: 4),
-                    Text(event["location"]!, style: const TextStyle(color: Colors.black54)),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }).toList();
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
   }
 
   TextStyle _headerTextStyle() {
