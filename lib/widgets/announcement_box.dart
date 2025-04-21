@@ -43,6 +43,7 @@ class AnnouncementBox extends StatelessWidget {
                     title: data['title'],
                     message: data['message'],
                     imagePath: data['imagePath'],
+                    imagePathTwo: data['imagePathTwo'],
                   ),
                 ),
               );

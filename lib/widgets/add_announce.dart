@@ -12,6 +12,7 @@ class _AddAnnouncePageState extends State<AddAnnouncePage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
   final TextEditingController _imgPathController = TextEditingController();
+  final TextEditingController _imgPathControllerTwo = TextEditingController();
   // File? _image;
 
   // Future<void> _pickImage() async {
@@ -31,6 +32,7 @@ class _AddAnnouncePageState extends State<AddAnnouncePage> {
         _titleController.text,
         _messageController.text,
         imagePath: _imgPathController.text.isNotEmpty ? _imgPathController.text : null,
+        imagePathTwo: _imgPathControllerTwo.text.isNotEmpty ? _imgPathControllerTwo.text : null,
       );
 
       Navigator.pop(context, true); 
@@ -65,6 +67,15 @@ class _AddAnnouncePageState extends State<AddAnnouncePage> {
               onChanged: (_) {
                 setState(() {});
               },
+            ),
+            SizedBox(height: 10),
+            if (_imgPathController.text.isNotEmpty) // <-- Conditionally show second TextField
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: TextField(
+                controller: _imgPathControllerTwo,
+                decoration: InputDecoration(labelText: 'Second Image URL (optional)'),
+              ),
             ),
             SizedBox(height: 20),
             ElevatedButton(onPressed: _createAnnouncement, child: Text('Create')),

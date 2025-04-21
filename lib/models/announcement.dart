@@ -5,12 +5,14 @@ class Announcement {
   final String message;
   final Timestamp timestamp;
   String? imagePath;
+  String? imagePathTwo;
 
   Announcement({
     required this.message,
     required this.title,
     required this.timestamp,
     this.imagePath,
+    this.imagePathTwo,
   });
 
   // Factory to create from Firestore
@@ -20,6 +22,7 @@ class Announcement {
       title: map['title'] ?? 'info',
       timestamp: map['timestamp'] is Timestamp ? map['timestamp'] : Timestamp.now(),
       imagePath: map['imagePath'] ?? '',
+      imagePathTwo: map['imagePathTwo'] ?? '',
     );
   }
 
@@ -30,10 +33,11 @@ class Announcement {
       'title': title,
       'timestamp': timestamp,
       'imagePath': imagePath,
+      'imagePathTwo': imagePathTwo,
     };
   }
 
-  static Future<void> addAnnounce(String title, String message, {String? imagePath}) async {
+  static Future<void> addAnnounce(String title, String message, {String? imagePath, String? imagePathTwo}) async {
   final db = FirebaseFirestore.instance;
   final annouceRef = db.collection('announcements').doc(); // gen id
 
@@ -41,6 +45,7 @@ class Announcement {
     title: title,
     message: message,
     imagePath: imagePath,
+    imagePathTwo: imagePathTwo,
     timestamp: Timestamp.now(),
   );
 
