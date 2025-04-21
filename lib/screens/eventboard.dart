@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:tuquest/pages/add_event_page.dart';
 import 'package:tuquest/widgets/add_announce.dart';
 import 'package:tuquest/widgets/bottom_nav.dart';
 import 'eventdetail.dart';
@@ -77,30 +78,51 @@ class _EventBoardPageState extends State<EventBoardPage> {
         ],
       ),
 
-      floatingActionButton: InkWell(
-            borderRadius: BorderRadius.circular(12), // ripple effect rounded
-            splashColor: Color.fromARGB(255, 255, 255, 255),
-            onTap: () {
-              final user = FirebaseAuth.instance.currentUser;
-              final email = user?.email ?? '';
+      floatingActionButton: Column(
+  mainAxisSize: MainAxisSize.min,
+  crossAxisAlignment: CrossAxisAlignment.end,
+  children: [
+    InkWell(
+      borderRadius: BorderRadius.circular(12),
+      splashColor: const Color.fromARGB(255, 255, 255, 255),
+      onTap: () {
+        final user = FirebaseAuth.instance.currentUser;
+        final email = user?.email ?? '';
 
-              // Temporary Condition. Pls fix thx.
-              if (email.endsWith('@tuquest.com')) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => AddAnnouncePage(),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Access Denied.')),
-                );
-              }
-            },
-        child: const Icon(Icons.add),
-      ///////////////////////////////////////////////////////////
+        if (email.endsWith('@tuquest.com')) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddAnnouncePage()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Access Denied.')),
+          );
+        }
+      },
+      child: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Icon(Icons.add, size: 28),
       ),
+    ),
+    const SizedBox(height: 16),
+    InkWell(
+      borderRadius: BorderRadius.circular(12),
+      splashColor: const Color.fromARGB(255, 255, 255, 255),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => AddEventPage()),
+        );
+      },
+      child: const Padding(
+        padding: EdgeInsets.all(8.0),
+        child: Icon(Icons.calendar_today, size: 28),
+      ),
+    ),
+  ],
+),
+
       bottomNavigationBar: const BottomNav(),
     );
   }

@@ -48,9 +48,9 @@ class EventDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Text("${eventData['title']}", style: _titleTextStyle()),
-                  eventData["imgPath"] != null && eventData["imgPath"]!.isNotEmpty
+                  eventData["imageUrl"] != null && eventData["imageUrl"]!.isNotEmpty
                 ? Image.network(
-                    eventData["imgPath"]!,
+                    eventData["imageUrl"]!,
                     height: 200,
                     errorBuilder: (context, error, stackTrace) => SizedBox(),
                   ): SizedBox(),
