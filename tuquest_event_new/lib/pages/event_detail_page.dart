@@ -1,36 +1,48 @@
 import 'package:flutter/material.dart';
+import '../models/event_model.dart';
 
 class EventDetailPage extends StatelessWidget {
-  final String eventName;
-  final DateTime eventDate;
-  final Function(DateTime, String) onDelete;
+  final EventModel event;
+  final String currentUserId;
+  final Function(String id) onDelete;
 
   const EventDetailPage({
     super.key,
-    required this.eventName,
-    required this.eventDate,
+    required this.event,
+    required this.currentUserId,
     required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(eventName)),
-      body: Center(
+      appBar: AppBar(title: Text(event.title)),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Event: $eventName', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            Text('Date: ${eventDate.toLocal().toString().split(' ')[0]}', style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                onDelete(eventDate, eventName);
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-              child: const Text('Delete Event'),
-            ),
+            Text('Event: ${event.title}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text('Date: ${event.startDate.toLocal()}'),
+            Text('To: ${event.endDate.toLocal()}'),
+            if (event.description.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text('Details: ${event.description}'),
+            ],
+            if (event.imageUrl != null && event.imageUrl!.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Image.network(event.imageUrl!),
+            ],
+            const Spacer(),
+            if (event.createdBy == currentUserId)
+              ElevatedButton(
+                onPressed: () {
+                  onDelete(event.id);
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text('Delete Event'),
+              )
           ],
         ),
       ),

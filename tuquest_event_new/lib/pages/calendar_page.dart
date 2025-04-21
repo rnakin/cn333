@@ -1,89 +1,99 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tuquest_event_new/pages/add_edit_event_page.dart';
 import '../models/event_model.dart';
 import '../widgets/calendar_widget.dart';
 import '../widgets/event_list_widget.dart';
+import 'add_edit_event_page.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
 
   @override
-  _CalendarPageState createState() => _CalendarPageState();
+  State<CalendarPage> createState() => _CalendarPageState();
 }
 
 class _CalendarPageState extends State<CalendarPage> {
+  final currentUser = FirebaseAuth.instance.currentUser!;
   DateTime _focusedDay = DateTime.now();
-  final Map<DateTime, List<String>> _events = {};
 
-  // Get events for the current month
-  List<EventModel> _getEventsForMonth(DateTime month) {
-    return _events.entries
-        .where((entry) =>
-            entry.key.year == month.year && entry.key.month == month.month)
-        .expand((entry) =>
-            entry.value.map((event) => EventModel(date: entry.key, title: event, description: '', id: '', start: month, end: month, createdBy: '')))
-        .toList();
+  Future<List<EventModel>> _fetchEventsForMonth(DateTime month) async {
+    final start = DateTime(month.year, month.month, 1);
+    final end = DateTime(month.year, month.month + 1, 0);
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('events')
+        .where('startDate', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('startDate', isLessThanOrEqualTo: Timestamp.fromDate(end))
+        .get();
+
+    return snapshot.docs.map((doc) => EventModel.fromFirestore(doc)).toList();
   }
 
-  // Add new event
-  void _addEvent(DateTime date, String title) {
-    setState(() {
-      _events.putIfAbsent(date, () => []).add(title);
-    });
+  void _goToAddEventPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => AddEditEventPage(
+          onSave: (event) async {
+            await FirebaseFirestore.instance.collection('events').add(event.toMap());
+            setState(() {}); // Refresh
+          },
+          currentUserId: currentUser.uid,
+        ),
+      ),
+    );
   }
 
-  // Delete an event
-  void _deleteEvent(DateTime date, String title) {
-    setState(() {
-      _events[date]?.remove(title);
-      if (_events[date]?.isEmpty ?? false) {
-        _events.remove(date);
-      }
-    });
+  void _deleteEvent(String id) async {
+    await FirebaseFirestore.instance.collection('events').doc(id).delete();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final events = _getEventsForMonth(_focusedDay);
-
     return Scaffold(
       appBar: AppBar(title: const Text('Event Calendar')),
-      body: Column(
-        children: [
-          CalendarWidget(
-            focusedDay: _focusedDay,
-            events: _events,
-            onMonthChanged: (day) => setState(() => _focusedDay = day),
-          ),
-          const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () => _showAddEventDialog(context),
-            child: const Text('Add Event'),
-          ),
-          const SizedBox(height: 10),
-          EventListWidget(events: events, onDelete: _deleteEvent),
-        ],
+      body: FutureBuilder<List<EventModel>>(
+        future: _fetchEventsForMonth(_focusedDay),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final events = snapshot.data ?? [];
+
+          return Column(
+            children: [
+              CalendarWidget(
+                focusedDay: _focusedDay,
+                events: _groupEventsByDate(events),
+                onMonthChanged: (newDay) => setState(() => _focusedDay = newDay),
+              ),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: _goToAddEventPage,
+                child: const Text('Add Event'),
+              ),
+              const SizedBox(height: 10),
+              EventListWidget(
+                events: events,
+                currentUserId: currentUser.uid,
+                onDelete: _deleteEvent,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  // Add Event Dialog
-  void _showAddEventDialog(BuildContext context) {
-    ElevatedButton(
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddEditEventPage(
-          onSave: ({required title, required description, required start, required end, required imagePath}) {
-            // TODO: บันทึกไป Firestore หรือ local _events
-          },
-        ),
-      ),
-    );
-  },
-  child: const Text('Add Event'),
-);
-
+  Map<DateTime, List<String>> _groupEventsByDate(List<EventModel> events) {
+    final map = <DateTime, List<String>>{};
+    for (var event in events) {
+      final date = DateTime(event.startDate.year, event.startDate.month, event.startDate.day);
+      map.putIfAbsent(date, () => []).add(event.title);
+    }
+    return map;
   }
 }

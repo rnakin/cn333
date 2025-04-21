@@ -4,11 +4,13 @@ import '../pages/event_detail_page.dart';
 
 class EventListWidget extends StatelessWidget {
   final List<EventModel> events;
-  final Function(DateTime, String) onDelete;
+  final String currentUserId;
+  final Function(String id) onDelete;
 
   const EventListWidget({
     super.key,
     required this.events,
+    required this.currentUserId,
     required this.onDelete,
   });
 
@@ -27,15 +29,17 @@ class EventListWidget extends StatelessWidget {
           final event = events[index];
           return ListTile(
             title: Text(event.title),
-            subtitle: Text('Date: ${event.date.toLocal().toString().split(' ')[0]}'),
+            subtitle: Text(
+              'Date: ${event.startDate.toLocal().toString().split(' ')[0]}',
+            ),
             trailing: const Icon(Icons.arrow_forward),
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => EventDetailPage(
-                    eventName: event.title,
-                    eventDate: event.date,
+                    event: event,
+                    currentUserId: currentUserId,
                     onDelete: onDelete,
                   ),
                 ),

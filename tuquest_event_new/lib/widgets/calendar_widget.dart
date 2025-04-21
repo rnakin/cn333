@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:tuquest_event_new/models/event_model.dart';
 
 class CalendarWidget extends StatelessWidget {
   final DateTime focusedDay;
-  final Map<DateTime, List<String>> events;
+  final List<EventModel> events;
   final Function(DateTime) onMonthChanged;
 
   const CalendarWidget({
@@ -26,7 +27,10 @@ class CalendarWidget extends StatelessWidget {
       ),
       availableGestures: AvailableGestures.none,
       onPageChanged: onMonthChanged,
-      eventLoader: (day) => events[day] ?? [],
+      eventLoader: (day) {
+  return events.where((event) =>
+    isSameDay(event.startDate, day)).toList();
+},
     );
   }
 }

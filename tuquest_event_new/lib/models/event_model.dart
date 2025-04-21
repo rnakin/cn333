@@ -1,9 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class EventModel {
   final String id;
   final String title;
   final String description;
-  final DateTime start;
-  final DateTime end;
+  final DateTime startDate;
+  final DateTime endDate;
   final String? imageUrl;
   final String createdBy;
 
@@ -11,30 +13,33 @@ class EventModel {
     required this.id,
     required this.title,
     required this.description,
-    required this.start,
-    required this.end,
+    required this.startDate,
+    required this.endDate,
+    required this.createdBy,
     this.imageUrl,
-    required this.createdBy, required DateTime date,
   });
 
-  Map<String, dynamic> toMap() => {
-    'title': title,
-    'description': description,
-    'start': start.toIso8601String(),
-    'end': end.toIso8601String(),
-    'imageUrl': imageUrl,
-    'createdBy': createdBy,
-  };
-
-  factory EventModel.fromMap(String id, Map<String, dynamic> data) {
+  factory EventModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
     return EventModel(
-      id: id,
-      title: data['title'],
-      description: data['description'],
-      start: DateTime.parse(data['start']),
-      end: DateTime.parse(data['end']),
+      id: doc.id,
+      title: data['title'] ?? '',
+      description: data['description'] ?? '',
+      startDate: (data['startDate'] as Timestamp).toDate(),
+      endDate: (data['endDate'] as Timestamp).toDate(),
       imageUrl: data['imageUrl'],
-      createdBy: data['createdBy'],
+      createdBy: data['createdBy'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'title': title,
+      'description': description,
+      'startDate': startDate,
+      'endDate': endDate,
+      'imageUrl': imageUrl,
+      'createdBy': createdBy,
+    };
   }
 }

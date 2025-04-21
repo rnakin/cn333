@@ -4,159 +4,168 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddEditEventPage extends StatefulWidget {
-  final Function({
+  final String? eventId;
+  final String? initialTitle;
+  final String? initialDescription;
+  final DateTime? initialStart;
+  final DateTime? initialEnd;
+  final String? initialImageUrl;
+  final String? initialImageFilePath;
+  final void Function({
     required String title,
     required String description,
     required DateTime start,
     required DateTime end,
-    required String? imagePath,
+    String? imageUrl,
+    String? imageFilePath,
   }) onSave;
 
-  const AddEditEventPage({super.key, required this.onSave});
+  const AddEditEventPage({
+    super.key,
+    this.eventId,
+    this.initialTitle,
+    this.initialDescription,
+    this.initialStart,
+    this.initialEnd,
+    this.initialImageUrl,
+    this.initialImageFilePath,
+    required this.onSave, required String currentUserId,
+  });
 
   @override
   State<AddEditEventPage> createState() => _AddEditEventPageState();
 }
 
 class _AddEditEventPageState extends State<AddEditEventPage> {
-  final _titleController = TextEditingController();
-  final _descController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _titleController;
+  late TextEditingController _descController;
+  late TextEditingController _imageUrlController;
   DateTime? _startDate;
   DateTime? _endDate;
-  File? _imageFile;
-  String? _imageUrl;
+  File? _pickedImage;
 
-  Future<void> _pickDate({required bool isStart}) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: isStart ? DateTime.now() : (_startDate ?? DateTime.now()),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2030),
-    );
-    if (picked != null) {
-      setState(() {
-        if (isStart) {
-          _startDate = picked;
-          if (_endDate != null && _endDate!.isBefore(picked)) {
-            _endDate = picked;
-          }
-        } else {
-          _endDate = picked;
-        }
-      });
-    }
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initialTitle);
+    _descController = TextEditingController(text: widget.initialDescription);
+    _imageUrlController = TextEditingController(text: widget.initialImageUrl);
+    _startDate = widget.initialStart ?? DateTime.now();
+    _endDate = widget.initialEnd ?? DateTime.now().add(const Duration(hours: 1));
   }
 
   Future<void> _pickImageFromGallery() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (picked != null) {
       setState(() {
-        _imageFile = File(picked.path);
-        _imageUrl = null;
+        _pickedImage = File(picked.path);
+        _imageUrlController.clear();
       });
     }
   }
 
-  void _setImageFromUrl(String url) {
+  Future<void> _pickDateTime({required bool isStart}) async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: isStart ? _startDate! : _endDate!,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+
+    if (date == null) return;
+
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(isStart ? _startDate! : _endDate!),
+    );
+
+    if (time == null) return;
+
+    final dateTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
     setState(() {
-      _imageUrl = url;
-      _imageFile = null;
+      if (isStart) {
+        _startDate = dateTime;
+      } else {
+        _endDate = dateTime;
+      }
     });
   }
 
-  void _saveEvent() {
-    if (_titleController.text.isEmpty || _startDate == null || _endDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill required fields.')),
+  void _submit() {
+    if (_formKey.currentState?.validate() ?? false) {
+      widget.onSave(
+        title: _titleController.text,
+        description: _descController.text,
+        start: _startDate!,
+        end: _endDate!,
+        imageUrl: _imageUrlController.text.isNotEmpty ? _imageUrlController.text : null,
+        imageFilePath: _pickedImage?.path,
       );
-      return;
+      Navigator.pop(context);
     }
-
-    widget.onSave(
-      title: _titleController.text,
-      description: _descController.text,
-      start: _startDate!,
-      end: _endDate!,
-      imagePath: _imageFile?.path ?? _imageUrl,
-    );
-
-    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
+    final imageToShow = _pickedImage != null
+        ? Image.file(_pickedImage!, height: 200)
+        : (_imageUrlController.text.isNotEmpty
+            ? Image.network(_imageUrlController.text, height: 200)
+            : null);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Add/Edit Event')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Event Name *'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: _descController,
-              maxLines: 3,
-              decoration: const InputDecoration(labelText: 'Details'),
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    title: Text(_startDate == null
-                        ? 'Start Date *'
-                        : 'Start: ${_startDate!.toLocal().toString().split(' ')[0]}'),
-                    leading: const Icon(Icons.calendar_today),
-                    onTap: () => _pickDate(isStart: true),
-                  ),
-                ),
-                Expanded(
-                  child: ListTile(
-                    title: Text(_endDate == null
-                        ? 'End Date *'
-                        : 'End: ${_endDate!.toLocal().toString().split(' ')[0]}'),
-                    leading: const Icon(Icons.calendar_today),
-                    onTap: () => _pickDate(isStart: false),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const Text('Image'),
-            Row(
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _pickImageFromGallery,
-                  icon: const Icon(Icons.image),
-                  label: const Text('Gallery'),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: TextField(
-                    onSubmitted: _setImageFromUrl,
-                    decoration: const InputDecoration(
-                      labelText: 'or enter image URL',
+      appBar: AppBar(title: Text(widget.eventId == null ? 'Add Event' : 'Edit Event')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+                validator: (value) => value == null || value.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: _descController,
+                decoration: const InputDecoration(labelText: 'Description'),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: ListTile(
+                      title: Text('Start: ${_startDate.toString().substring(0, 16)}'),
+                      onTap: () => _pickDateTime(isStart: true),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            if (_imageFile != null)
-              Image.file(_imageFile!, height: 150)
-            else if (_imageUrl != null)
-              Image.network(_imageUrl!, height: 150)
-            else
-              const Text('No image selected'),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveEvent,
-              child: const Text('Save Event'),
-            ),
-          ],
+                  Expanded(
+                    child: ListTile(
+                      title: Text('End: ${_endDate.toString().substring(0, 16)}'),
+                      onTap: () => _pickDateTime(isStart: false),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _imageUrlController,
+                decoration: const InputDecoration(labelText: 'Image URL (optional)'),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.image),
+                label: const Text("Pick from Gallery"),
+                onPressed: _pickImageFromGallery,
+              ),
+              if (imageToShow != null) imageToShow,
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _submit,
+                child: const Text('Save Event'),
+              )
+            ],
+          ),
         ),
       ),
     );
