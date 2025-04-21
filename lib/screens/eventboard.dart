@@ -35,6 +35,11 @@ class _EventBoardPageState extends State<EventBoardPage> {
 
   @override
   Widget build(BuildContext context) {
+
+    final user = FirebaseAuth.instance.currentUser;
+    final email = user?.email ?? '';
+    final isAllowedUser = email.endsWith('@tuquest.com');
+
     return Scaffold(
       body: Stack(
         children: [
@@ -79,59 +84,42 @@ class _EventBoardPageState extends State<EventBoardPage> {
       ),
 
       floatingActionButton: Column(
-  mainAxisSize: MainAxisSize.min,
-  crossAxisAlignment: CrossAxisAlignment.end,
-  children: [
-    InkWell(
-      borderRadius: BorderRadius.circular(12),
-      splashColor: const Color.fromARGB(255, 255, 255, 255),
-      onTap: () {
-        final user = FirebaseAuth.instance.currentUser;
-        final email = user?.email ?? '';
-
-        if (email.endsWith('@tuquest.com')) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddAnnouncePage()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Access Denied.')),
-          );
-        }
-      },
-      child: const Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Icon(Icons.add, size: 28),
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (isAllowedUser)
+          InkWell(
+            borderRadius: BorderRadius.circular(12),
+            splashColor: const Color.fromARGB(255, 255, 255, 255),
+            onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => AddAnnouncePage()),
+                );
+            },
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Icon(Icons.add, size: 28),
+            ),
+          ),
+          if (isAllowedUser) const SizedBox(height: 16),
+          if (isAllowedUser)
+            InkWell(
+              borderRadius: BorderRadius.circular(12),
+              splashColor: const Color.fromARGB(255, 255, 255, 255),
+              onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => AddEventPage()),
+                  );
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Icon(Icons.calendar_today, size: 28),
+              ),
+            ),
+        ],
       ),
-    ),
-    const SizedBox(height: 16),
-    InkWell(
-      borderRadius: BorderRadius.circular(12),
-      splashColor: const Color.fromARGB(255, 255, 255, 255),
-      onTap: () {
-        final user = FirebaseAuth.instance.currentUser;
-        final email = user?.email ?? '';
-
-        if (email.endsWith('@tuquest.com')) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddEventPage()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Access Denied.')),
-          );
-        }
-        
-      },
-      child: const Padding(
-        padding: EdgeInsets.all(8.0),
-        child: Icon(Icons.calendar_today, size: 28),
-      ),
-    ),
-  ],
-),
 
       bottomNavigationBar: const BottomNav(),
     );
