@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tuquest/tulogintest.dart';
 import './home/home.dart';
 import 'package:tuquest/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tuquest/material/validator.dart';
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -13,7 +13,8 @@ class LoginPage extends StatefulWidget {
   State<LoginPage> createState() => LoginPageState();
 }
 
-class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixin {
+class LoginPageState extends State<LoginPage>
+    with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
@@ -73,9 +74,10 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
-        _errorMessage = (e.code == 'invalid-credential')
-            ? 'Invalid email or password.'
-            : 'An error occurred. Please try again.';
+        _errorMessage =
+            (e.code == 'invalid-credential')
+                ? 'Invalid email or password.'
+                : 'An error occurred. Please try again.';
       });
     } catch (_) {
       setState(() => _errorMessage = 'Unexpected error occurred.');
@@ -137,7 +139,10 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
             child: Align(
               alignment: Alignment.bottomCenter,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 60),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 50,
+                  vertical: 60,
+                ),
                 width: double.infinity,
                 height: MediaQuery.of(context).size.height * 0.68,
                 decoration: const BoxDecoration(
@@ -185,8 +190,14 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                               ),
                               filled: true,
                               fillColor: Colors.grey[100],
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                              prefixIcon: Icon(Icons.person_outline, color: Colors.grey[600]),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.person_outline,
+                                color: Colors.grey[600],
+                              ),
                             ),
                           ),
                         ],
@@ -218,15 +229,25 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                               ),
                               filled: true,
                               fillColor: Colors.grey[100],
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                              prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[600]),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 14,
+                              ),
+                              prefixIcon: Icon(
+                                Icons.lock_outline,
+                                color: Colors.grey[600],
+                              ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                  _obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
                                   color: Colors.grey[600],
                                 ),
                                 onPressed: () {
-                                  setState(() => _obscurePassword = !_obscurePassword);
+                                  setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  );
                                 },
                               ),
                             ),
@@ -248,30 +269,65 @@ class LoginPageState extends State<LoginPage> with SingleTickerProviderStateMixi
                       SizedBox(
                         width: double.infinity,
                         height: 50,
-                        child: _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFF9D00),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                        child:
+                            _isLoading
+                                ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                                : ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF9D00),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed: _submitForm,
+                                  child: Text(
+                                    'Login',
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
-                                onPressed: _submitForm,
-                                child: Text(
-                                  'Login',
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child:
+                            _isLoading
+                                ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                                : ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF9D00),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  onPressed:
+                                      () => {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => const TULoginPage(),
+                                          ),
+                                        ),
+                                      },
+                                  child: Text(
+                                    'Login with tu test',
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
-                              ),
                       ),
 
                       const SizedBox(height: 20),
-
-                     
                     ],
                   ),
                 ),

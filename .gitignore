@@ -152,3 +152,4 @@ unlinked_spec.ds
 # ===========================
 **/generated_plugin_registrant.dart
 .image/ios/*
+env.json
