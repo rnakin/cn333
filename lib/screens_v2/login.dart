@@ -16,7 +16,7 @@ class LoginPage extends StatefulWidget {
 class LoginPageState extends State<LoginPage>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _idController = TextEditingController();
   final _passController = TextEditingController();
 
   bool _obscurePassword = true;
@@ -48,7 +48,7 @@ class LoginPageState extends State<LoginPage>
   @override
   void dispose() {
     _animationController.dispose();
-    _emailController.dispose();
+    _idController.dispose();
     _passController.dispose();
     super.dispose();
   }
@@ -60,29 +60,54 @@ class LoginPageState extends State<LoginPage>
       _isLoading = true;
       _errorMessage = null;
     });
+    if (Validator.emailOrID(_idController.text.trim()) == "email") {
+      try {
+        await TQauth.loginViaEmail(
+          _idController.text.trim(),
+          _passController.text.trim(),
+        );
 
-    try {
-      await TQauth.loginViaEmail(
-        _emailController.text.trim(),
-        _passController.text.trim(),
-      );
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomePage()),
+        );
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          _errorMessage =
+              (e.code == 'invalid-credential')
+                  ? 'Invalid Email or password.'
+                  : 'An error occurred. Please try again.';
+        });
+      } catch (_) {
+        setState(() => _errorMessage = 'Unexpected error occurred.');
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
+    }else if ((Validator.emailOrID(_idController.text.trim()) == "id")){
+         try {
+        await TQauth.loginViaID(
+          _idController.text.trim(),
+          _passController.text.trim(),
+        );
 
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage =
-            (e.code == 'invalid-credential')
-                ? 'Invalid email or password.'
-                : 'An error occurred. Please try again.';
-      });
-    } catch (_) {
-      setState(() => _errorMessage = 'Unexpected error occurred.');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomePage()),
+        );
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          _errorMessage =
+              (e.code == 'invalid-credential')
+                  ? 'Invalid ID or password.'
+                  : 'An error occurred. Please try again.';
+        });
+      } catch (_) {
+        setState(() => _errorMessage = 'Unexpected error occurred.');
+      } finally {
+        if (mounted) setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -179,7 +204,7 @@ class LoginPageState extends State<LoginPage>
                           ),
                           const SizedBox(height: 8),
                           TextFormField(
-                            controller: _emailController,
+                            controller: _idController,
                             validator: Validator.studentID,
                             decoration: InputDecoration(
                               hintText: 'Enter your student ID',
