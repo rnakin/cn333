@@ -40,6 +40,23 @@ static String? studentID(String? value) {
 
   return null;
 }
+static String emailOrID(String text) {
+  // Regular expression for basic email validation
+  String emailPattern =
+      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+  RegExp emailRegExp = RegExp(emailPattern);
 
+  // Check if the input is an email
+  if (emailRegExp.hasMatch(text)) {
+    return "email"; 
+  }
+
+  // Check if the input is id
+  if (text.length == 10 && int.tryParse(text) != null) {
+    return "id"; 
+  }
+
+  return ""; // Invalid input
+}
 
 }
