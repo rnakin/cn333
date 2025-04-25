@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:tuquest/tulogintest.dart';
 import './home/home.dart';
 import 'package:tuquest/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -60,9 +59,11 @@ class LoginPageState extends State<LoginPage>
       _isLoading = true;
       _errorMessage = null;
     });
-    if (Validator.emailOrID(_idController.text.trim()) == "email") {
+    
+    if (Validator.studentID(_idController.text.trim())==null) {
+      
       try {
-        await TQauth.loginViaEmail(
+        await TQauth.loginViaID(
           _idController.text.trim(),
           _passController.text.trim(),
         );
@@ -79,35 +80,13 @@ class LoginPageState extends State<LoginPage>
                   ? 'Invalid Email or password.'
                   : 'An error occurred. Please try again.';
         });
-      } catch (_) {
-        setState(() => _errorMessage = 'Unexpected error occurred.');
+      } catch (e) {
+        print("Login error: $e");
+        setState(() => _errorMessage = "Unexpected error occurred. $e");
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
-    }else if ((Validator.emailOrID(_idController.text.trim()) == "id")){
-         try {
-        await TQauth.loginViaID(
-          _idController.text.trim(),
-          _passController.text.trim(),
-        );
 
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomePage()),
-        );
-      } on FirebaseAuthException catch (e) {
-        setState(() {
-          _errorMessage =
-              (e.code == 'invalid-credential')
-                  ? 'Invalid ID or password.'
-                  : 'An error occurred. Please try again.';
-        });
-      } catch (_) {
-        setState(() => _errorMessage = 'Unexpected error occurred.');
-      } finally {
-        if (mounted) setState(() => _isLoading = false);
-      }
     }
   }
 
@@ -309,40 +288,6 @@ class LoginPageState extends State<LoginPage>
                                   onPressed: _submitForm,
                                   child: Text(
                                     'Login',
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                      ),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child:
-                            _isLoading
-                                ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
-                                : ElevatedButton(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFFFF9D00),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  onPressed:
-                                      () => {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => const TULoginPage(),
-                                          ),
-                                        ),
-                                      },
-                                  child: Text(
-                                    'Login with tu test',
                                     style: GoogleFonts.montserrat(
                                       fontSize: 18,
                                       fontWeight: FontWeight.w700,
