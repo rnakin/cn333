@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
+import 'package:tuquest/screens_v2/home/home.dart';
 import 'screens_v2/login.dart';
 import 'screens_v2/providers/fav_provider.dart';
 import 'screens_v2/providers/navbar_provider.dart';
@@ -35,6 +37,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
     return MaterialApp(
       title: 'NotiTU',
       debugShowCheckedModeBanner: false,
@@ -45,7 +48,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         textTheme: GoogleFonts.montserratTextTheme(Theme.of(context).textTheme),
       ),
-      home: const SplashPage(),
+      home:user==null ? const SplashPage(): const HomePage(),
     );
   }
 }
