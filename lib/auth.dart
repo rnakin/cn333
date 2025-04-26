@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,11 +7,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class TQauth {
-  static Future<void> logout() async {
+  static Future<bool> logout() async {
     try {
       await FirebaseAuth.instance.signOut();
+      return true;
     } catch (e) {
-      print("Error signing out: $e");
+      return false;
     }
   }
 
@@ -48,9 +50,9 @@ class TQauth {
           .collection('idToEmail') // You can rename this collection if needed
           .doc(id)
           .set({'email': email});
-      print("ID to Email mapping saved successfully.");
+      debugPrint("ID to Email mapping saved successfully.");
     } catch (e) {
-      print("Failed to save ID to Email mapping: $e");
+      debugPrint("Failed to save ID to Email mapping: $e");
       throw e;
     }
   }
@@ -68,12 +70,13 @@ class TQauth {
     } catch (e) {
       //Case 2 Student, but new user
       //Step 1 Using id and password, fetch email from tu api
-      print("fetching email failed, verify with TU ...");
+      debugPrint("fetching email failed, verify with TU ...");
       final personInfoResponse = await verifyID(id, password);
+      debugPrint("verified");
       if (personInfoResponse['status'] == true) {
         email = personInfoResponse['email'];
       } else {
-        print("ID verification failed.");
+        debugPrint("ID verification failed.");
         throw Exception("ID verification failed.");
       }
     }
@@ -82,15 +85,15 @@ class TQauth {
       final newCredential = await createUserViaEmail(email, password);
       await saveIdEmailMapping(id, email);
 
-      print("User account created for $email and ID mapping saved.");
+      debugPrint("User account created for $email and ID mapping saved.");
       return newCredential;
     } on FirebaseAuthException catch (e) {
-      print(
+      debugPrint(
         "FirebaseAuthException during user creation: ${e.code} - ${e.message}",
       );
       rethrow;
     } catch (e) {
-      print("Unexpected error during user creation: $e");
+      debugPrint("Unexpected error during user creation: $e");
       rethrow;
     }
   }
@@ -106,11 +109,11 @@ class TQauth {
       if (doc.exists && doc.data()!.containsKey('email')) {
         return doc.data()!['email'] as String;
       } else {
-        print("No email found for ID: $id");
+        debugPrint("No email found for ID: $id");
         return "";
       }
     } catch (e) {
-      print("Error fetching email: $e");
+      debugPrint("Error fetching email: $e");
       return "";
     }
   }
@@ -119,14 +122,17 @@ class TQauth {
     String username,
     String password,
   ) async {
-    String apiUrl = dotenv.env['TU_API_URL_1']!;
+    final String? apiUrl = dotenv.env['TU_API_URL_1'];
+    if (apiUrl == null || apiUrl.isEmpty) {
+      throw Exception('❌ TU_API_URL_1 is not set in environment.');
+    }
+
     try {
       final Map<String, String> credentials = {
         'UserName': username,
         'PassWord': password,
       };
 
-      // POST request
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
@@ -134,15 +140,27 @@ class TQauth {
       );
 
       if (response.statusCode == 200) {
-        print(json.decode(response.body));
-        return json.decode(response.body);
+        debugPrint("✅ verify OK");
+        debugPrint("📨 Raw response body: ${response.body}");
+
+        if (response.body.isEmpty) {
+          throw Exception("❌ Empty response from TU API.");
+        }
+
+        final decoded = json.decode(response.body);
+        if (decoded is! Map<String, dynamic>) {
+          throw Exception("❌ Invalid response format from TU API.");
+        }
+
+        debugPrint("🔍 Decoded JSON: $decoded");
+        return decoded;
       } else {
         throw Exception(
-          'Failed to authenticate. Status code: ${response.statusCode}',
+          '❌ Failed to authenticate. Status code: ${response.statusCode}',
         );
       }
     } catch (e) {
-      throw Exception('Failed to communicate with the server: $e');
+      throw Exception('❌ Failed to communicate with the server: $e');
     }
   }
 }
