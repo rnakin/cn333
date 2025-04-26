@@ -6,6 +6,7 @@ import 'profile.dart';
 import 'contact.dart';
 import 'login.dart';
 import 'widgets_v2/topbar.dart';
+import 'package:tuquest/auth.dart';
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -19,15 +20,18 @@ class _AccountPageState extends State<AccountPage> {
   final Map<String, dynamic> _userData = {
     'name': 'สมศักดิ์ สมชาย',
     'studentId': '6510615999',
-    'profileImageUrl': 'https://i.pinimg.com/564x/5e/b5/5e/5eb55ec2482b119c9bb8a207d255b07e.jpg',
+    'profileImageUrl':
+        'https://i.pinimg.com/564x/5e/b5/5e/5eb55ec2482b119c9bb8a207d255b07e.jpg',
     'isNotificationOn': true,
     'language': 'TH',
   };
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedImage =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 75);
+    final pickedImage = await picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 75,
+    );
 
     if (pickedImage != null) {
       setState(() {
@@ -65,7 +69,11 @@ class _AccountPageState extends State<AccountPage> {
                   onTap: () => Navigator.pop(context),
                   child: Row(
                     children: [
-                      const Icon(Icons.chevron_left, color: Color(0xFFA00000), size: 32),
+                      const Icon(
+                        Icons.chevron_left,
+                        color: Color(0xFFA00000),
+                        size: 32,
+                      ),
                       Text(
                         "Back",
                         style: GoogleFonts.montserrat(
@@ -77,7 +85,11 @@ class _AccountPageState extends State<AccountPage> {
                     ],
                   ),
                 ),
-                const Icon(Icons.help_outline, color: Color(0xFFD55757), size: 32),
+                const Icon(
+                  Icons.help_outline,
+                  color: Color(0xFFD55757),
+                  size: 32,
+                ),
               ],
             ),
           ),
@@ -91,10 +103,14 @@ class _AccountPageState extends State<AccountPage> {
                 backgroundColor: Colors.white,
                 child: CircleAvatar(
                   radius: 78,
-                  backgroundImage: _userData['profileImageUrl'] != null &&
-                          !_userData['profileImageUrl'].toString().startsWith('http')
-                      ? Image.file(File(_userData['profileImageUrl'])).image
-                      : NetworkImage(_userData['profileImageUrl']) as ImageProvider,
+                  backgroundImage:
+                      _userData['profileImageUrl'] != null &&
+                              !_userData['profileImageUrl']
+                                  .toString()
+                                  .startsWith('http')
+                          ? Image.file(File(_userData['profileImageUrl'])).image
+                          : NetworkImage(_userData['profileImageUrl'])
+                              as ImageProvider,
                 ),
               ),
               Positioned(
@@ -129,9 +145,9 @@ class _AccountPageState extends State<AccountPage> {
           Text(
             'Student ID: ${_userData['studentId']}',
             style: const TextStyle(
-              color: Colors.white, 
-              fontSize: 18, 
-              fontWeight: FontWeight.w900
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
             ),
           ),
 
@@ -151,10 +167,13 @@ class _AccountPageState extends State<AccountPage> {
                   _buildTile(
                     icon: Icons.person,
                     title: "Profile",
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ProfilePage()),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ProfilePage(),
+                          ),
+                        ),
                   ),
                   const SizedBox(height: 18),
 
@@ -167,10 +186,13 @@ class _AccountPageState extends State<AccountPage> {
                   _buildTile(
                     icon: Icons.mail,
                     title: "Contact us",
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ContactPage()),
-                    ),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ContactPage(),
+                          ),
+                        ),
                   ),
 
                   const Spacer(),
@@ -186,15 +208,36 @@ class _AccountPageState extends State<AccountPage> {
                         ),
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
-                      onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginPage()),
-                        );
+                      onPressed: () async {
+                        bool isLoading = true;
+                        bool result = false;
+
+                        try {
+                          result = await TQauth.logout();
+                        } catch (e) {
+                          // Optionally handle the error, e.g., show a snackbar
+                        } finally {
+                          isLoading = false;
+                        }
+
+                        if (result == true) {
+                          if (context.mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginPage(),
+                              ),
+                            );
+                          }
+                        }
                       },
                       child: const Text(
                         "Logout",
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
                     ),
                   ),
@@ -220,9 +263,16 @@ class _AccountPageState extends State<AccountPage> {
       ),
       title: Text(
         title,
-        style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFFA00000)),
+        style: const TextStyle(
+          fontWeight: FontWeight.w900,
+          color: Color(0xFFA00000),
+        ),
       ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFFA00000)),
+      trailing: const Icon(
+        Icons.arrow_forward_ios,
+        size: 18,
+        color: Color(0xFFA00000),
+      ),
       onTap: onTap,
     );
   }
