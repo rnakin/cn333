@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,8 +25,8 @@ class TQauth {
         password: password,
       );
       return credential;
-    } on FirebaseAuthException catch (e) {
-      throw e;
+    } on FirebaseAuthException {
+      rethrow;
     }
   }
 
@@ -39,8 +38,8 @@ class TQauth {
       final credential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
       return credential;
-    } on FirebaseAuthException catch (e) {
-      throw e;
+    } on FirebaseAuthException {
+      rethrow;
     }
   }
 
@@ -53,7 +52,7 @@ class TQauth {
       debugPrint("ID to Email mapping saved successfully.");
     } catch (e) {
       debugPrint("Failed to save ID to Email mapping: $e");
-      throw e;
+      rethrow;
     }
   }
 
