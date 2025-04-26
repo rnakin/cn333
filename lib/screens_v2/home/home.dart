@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../widgets_v2/topbar.dart';
 import '../widgets_v2/navbar.dart';
-import 'sections/home_container.dart';
+import '../widgets_v2/announce_card.dart';
+import '../widgets_v2/calendar.dart';
+import '../widgets_v2/listpost.dart';
 import '../schedule_page.dart';
 import '../virtual_card.dart';
 
@@ -13,7 +16,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final PageController _pageController = PageController();
   final ScrollController _scrollController = ScrollController();
+  int _currentIndex = 0;
   DateTime _selectedDate = DateTime.now();
 
   void _onDateSelected(DateTime date) {
@@ -22,58 +27,93 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _onNavTapped(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildHomeContent() {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: ListView(
+        controller: _scrollController,
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24),
+            child: AnnounceCard(),
+          ),
+          const SizedBox(height: 16),
+          CalendarSection(onDateSelected: _onDateSelected),
+          const SizedBox(height: 16),
+          ListPostSection(selectedDate: _selectedDate),
+          const SizedBox(height: 100),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFF9D00),
       appBar: const CustomTopBar(),
-      //bottomNavigationBar: const CustomNavBar(selectedIndex: 1),
-      bottomNavigationBar: const CustomNavBar(),
-      body: Stack(
+      body: PageView(
+        controller: _pageController,
+        physics: const BouncingScrollPhysics(),
+        onPageChanged: (index) {
+          setState(() => _currentIndex = index);
+        },
         children: [
-          // Gesture โอบคลุมทั้งพื้นหลัง
-          GestureDetector(
-            onVerticalDragEnd: (details) {
-              if (details.primaryVelocity != null && details.primaryVelocity! > 200) {
-                /*Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const VirtualCardPage()),
-                );*/
-                // ตัวอย่างการเรียกใช้จากหน้า Home
-Navigator.push(
-  context,
-  MaterialPageRoute(
-    builder: (_) => VirtualCardPage(
-      onBackToTop: () {
-        Navigator.popUntil(context, (route) => route.isFirst);
-      },
-    ),
-  ),
-);
-              }
-            },
-            onHorizontalDragEnd: (details) {
-              if (details.primaryVelocity != null && details.primaryVelocity! < -300) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SchedulePage()),
-                );
-              }
-            },
-            // พื้นหลังสีส้ม
-            child: Container(color: const Color(0xFFFF9D00)),
+          Padding(
+            padding: const EdgeInsets.only(top: 50),
+            child: _buildHomeContent(),
           ),
-
-          // กล่องขาวซ้อนทับ
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 50), // <-- เพิ่ม space 
-              child: HomeContainer(
-                scrollController: _scrollController,
-                selectedDate: _selectedDate,
-                onDateSelected: _onDateSelected,
-              ),
-            ),
+          const SchedulePage(),
+          VirtualCardPage(
+            onBackToTop: () {
+              _pageController.jumpToPage(0);
+            },
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onNavTapped,
+        backgroundColor: Colors.white,
+        selectedItemColor: const Color(0xFFFF9D00),
+        unselectedItemColor: Colors.grey,
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Schedule',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.credit_card),
+            label: 'Card',
           ),
         ],
       ),
