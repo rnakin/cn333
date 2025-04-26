@@ -37,7 +37,7 @@ flutter:
 
   assets:
     - assets/
-    - ./env.json
+    - .env
 flutter_native_splash:
   android: true
   color: "#dd2c00"
