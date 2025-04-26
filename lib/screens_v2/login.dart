@@ -4,6 +4,7 @@ import './home/home.dart';
 import 'package:tuquest/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tuquest/material/validator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -59,9 +60,8 @@ class LoginPageState extends State<LoginPage>
       _isLoading = true;
       _errorMessage = null;
     });
-    
-    if (Validator.studentID(_idController.text.trim())==null) {
-      
+
+    if (Validator.studentID(_idController.text.trim()) == null) {
       try {
         await TQauth.loginViaID(
           _idController.text.trim(),
@@ -86,7 +86,6 @@ class LoginPageState extends State<LoginPage>
       } finally {
         if (mounted) setState(() => _isLoading = false);
       }
-
     }
   }
 
@@ -296,7 +295,7 @@ class LoginPageState extends State<LoginPage>
                                   ),
                                 ),
                       ),
-
+              
                       const SizedBox(height: 20),
                     ],
                   ),
