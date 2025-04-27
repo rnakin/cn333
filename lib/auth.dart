@@ -7,6 +7,21 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TQauth {
+
+    static Future<bool> isAdmin() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')  // Assuming 'users' collection
+          .doc(user.uid)
+          .get();
+
+      // Check if the user document exists and has 'role' field as 'admin'
+      return userDoc.exists && userDoc.data()?['role'] == 'admin';
+    }
+    return false;
+  }
+
   static Future<bool> logout() async {
     try {
       await FirebaseAuth.instance.signOut();
