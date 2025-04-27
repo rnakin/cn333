@@ -2,24 +2,41 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'widgets_v2/topbar.dart';
-import 'models/model.dart';
 import 'providers/fav_provider.dart';
 import 'widgets_v2/post_card.dart';
 import 'widgets_v2/navbar.dart';
 import 'post_detail.dart';
 import 'virtual_card.dart';
 
-class FavPage extends StatelessWidget {
+class FavPage extends StatefulWidget {
   const FavPage({super.key});
 
   @override
+  _FavPageState createState() => _FavPageState();
+}
+
+class _FavPageState extends State<FavPage> with AutomaticKeepAliveClientMixin {
+  @override
+bool get wantKeepAlive => true; // Keep the state of the page alive
+
+
+  Future<void> _loadFavorites() async {
+    final favProvider = Provider.of<FavProvider>(context, listen: false);
+    await favProvider.loadFromFirebase();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();  
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final favs = Provider.of<FavProvider>(context).favs;
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
 
     return Scaffold(
       backgroundColor: const Color(0xFFFF9D00),
-      appBar: const CustomTopBar(),
-      bottomNavigationBar: const CustomNavBar(),
       body: GestureDetector(
         onVerticalDragEnd: (d) {
           if (d.primaryVelocity! > 300) {
@@ -82,37 +99,47 @@ class FavPage extends StatelessWidget {
 
                         // Content
                         Expanded(
-                          child: favs.isEmpty
-                              ? Center(
+                          child: Consumer<FavProvider>( // Listen to changes in FavProvider
+                            builder: (context, favProvider, child) {
+                              final favs = favProvider.favs;
+
+                              // If no favorite posts
+                              if (favs.isEmpty) {
+                                return Center(
                                   child: Text(
                                     "ยังไม่มีโพสต์ที่บันทึกไว้",
                                     style: GoogleFonts.montserrat(
                                       color: Colors.grey[600],
                                     ),
                                   ),
-                                )
-                              : ListView.builder(
-                                  itemCount: favs.length,
-                                  itemBuilder: (context, index) {
-                                    final post = favs[index];
-                                    return Column(
-                                      children: [
-                                        PostCard(
-                                          post: post,
-                                          onTap: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  PostDetailPage.fromPost(post: post),
-                                            ),
+                                );
+                              }
+
+                              // List of favorite posts
+                              return ListView.builder(
+                                itemCount: favs.length,
+                                itemBuilder: (context, index) {
+                                  final post = favs[index];
+                                  return Column(
+                                    children: [
+                                      PostCard(
+                                        post: post,
+                                        onTap: () => Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) =>
+                                                PostDetailPage.fromPost(post: post),
                                           ),
                                         ),
-                                        if (index != favs.length - 1)
-                                          const SizedBox(height: 12),
-                                      ],
-                                    );
-                                  },
-                                ),
+                                      ),
+                                      if (index != favs.length - 1)
+                                        const SizedBox(height: 12),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         ),
                       ],
                     ),

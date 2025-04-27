@@ -1,37 +1,88 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/model.dart';
 
 class FavProvider with ChangeNotifier {
-  final List<Post> _favoritePosts = [];
+  List<Post> _favs = [];
 
-  // ✅ สร้าง getter ชื่อ favs
-  List<Post> get favs => _favoritePosts;
+  List<Post> get favs => _favs;
 
-  // เพิ่มเมธอดตรวจสอบการมีอยู่ด้วย id
-  bool isExist(String postId) {
-    return _favoritePosts.any((post) => post.id == postId);
-  }
+  final user = FirebaseAuth.instance.currentUser;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // แก้ไขเมธอด add ให้ตรวจสอบก่อนเพิ่ม
-  void add(Post post) {
-    if (!isExist(post.id)) {
-      _favoritePosts.add(post);
-      notifyListeners();
-    }
-  }
-
-  // แก้ไขเมธอด remove ให้ทำงานมีประสิทธิภาพมากขึ้น
-  void remove(Post post) {
-    _favoritePosts.removeWhere((p) => p.id == post.id);
-    notifyListeners();
-  }
-
-  // เมธอดตรวจสอบสถานะ Favorite
   bool isFavorite(Post post) {
-    return isExist(post.id);
+    return _favs.any((p) => p.id == post.id);
   }
 
-  bool containsPost(String postId) {
-  return _favoritePosts.any((post) => post.id == postId);
+  Future<void> add(Post post) async {
+    _favs.add(post);
+    notifyListeners();
+    await _saveToFirebase();
+  }
+
+  Future<void> remove(Post post) async {
+    _favs.removeWhere((p) => p.id == post.id);
+    notifyListeners();
+    await _saveToFirebase();
+  }
+
+  Future<void> _saveToFirebase() async {
+    if (user == null) return;
+
+    final favData = _favs.map((post) => {
+      'id': post.id,
+      'topic': post.topic,
+      'detail': post.detail,
+      'imageUrl': post.imageUrl,
+      'isNetworkImage': post.isNetworkImage,
+      'createdAt': post.createdAt.toIso8601String(),
+      if (post is Event) ...{
+        'startDate': post.startDate.toIso8601String(),
+        'endDate': post.endDate.toIso8601String(),
+      },
+    }).toList();
+
+    await _firestore.collection('favorites').doc(user!.uid).set({
+      'posts': favData,
+    });
+  }
+
+  Future<void> loadFromFirebase() async {
+    if (user == null) return;
+
+    final doc = await _firestore.collection('favorites').doc(user!.uid).get();
+
+    if (doc.exists) {
+      final data = doc.data();
+      if (data != null && data['posts'] != null) {
+        _favs = (data['posts'] as List).map<Post>((p) {
+          if (p['startDate'] != null && p['endDate'] != null) {
+            return Event(
+              id: p['id'],
+              topic: p['topic'],
+              detail: p['detail'],
+              imageUrl: p['imageUrl'],
+              isNetworkImage: p['isNetworkImage'],
+              createdAt: DateTime.parse(p['createdAt']),
+              startDate: DateTime.parse(p['startDate']),
+              endDate: DateTime.parse(p['endDate']),
+              creatorUID: FirebaseAuth.instance.currentUser?.uid ?? '',
+            );
+          } else {
+            return Post(
+              id: p['id'],
+              topic: p['topic'],
+              detail: p['detail'],
+              imageUrl: p['imageUrl'],
+              isNetworkImage: p['isNetworkImage'],
+              createdAt: DateTime.parse(p['createdAt']),
+              creatorUID: FirebaseAuth.instance.currentUser?.uid ?? '',
+            );
+          }
+        }).toList();
+        notifyListeners();
+      }
+    }
   }
 }
