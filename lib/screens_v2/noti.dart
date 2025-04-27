@@ -29,6 +29,7 @@ class NotiPage extends StatelessWidget {
           imageUrl: doc['imageUrl'],
           isNetworkImage: doc['isNetworkImage'],
           createdAt: (doc['createdAt'] as Timestamp).toDate(),
+          creatorUID: FirebaseAuth.instance.currentUser?.uid ?? '',
         );
       }).toList();
     });

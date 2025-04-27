@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -75,6 +76,7 @@ void _submitNotification() async {
       'imageUrl': imageUrl ?? '',  // Use an empty string if no image is provided
       'isNetworkImage': imageUrl != null,
       'createdAt': Timestamp.now(),
+      'creatorUID': FirebaseAuth.instance.currentUser?.uid ?? '',
     });
 
     // Clear the input fields and reset image selection
