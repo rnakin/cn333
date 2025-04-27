@@ -2,54 +2,69 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:google_fonts/google_fonts.dart';
-import 'profile.dart';
+
 import 'contact.dart';
 import 'login.dart';
+import 'profile.dart';
 import 'widgets_v2/topbar.dart';
 import 'package:tuquest/auth.dart';
 
+/// A simple user model to hold account information.
+class User {
+  String name;
+  String studentId;
+  String? profileImagePath;
+  bool notificationsEnabled;
+  String language;
+
+  User({
+    required this.name,
+    required this.studentId,
+    this.profileImagePath,
+    this.notificationsEnabled = true,
+    this.language = 'TH',
+  });
+}
+
 class AccountPage extends StatefulWidget {
-  const AccountPage({super.key});
+  const AccountPage({Key? key}) : super(key: key);
 
   @override
   State<AccountPage> createState() => _AccountPageState();
 }
 
 class _AccountPageState extends State<AccountPage> {
-  // Mock Data สำหรับผู้ใช้
-  final Map<String, dynamic> _userData = {
-    'name': 'สมศักดิ์ สมชาย',
-    'studentId': '6510615999',
-    'profileImageUrl':
+  final User _currentUser = User(
+    name: 'สมศักดิ์ สมชาย',
+    studentId: '6510615999',
+    // Default network image
+    profileImagePath:
         'https://i.pinimg.com/564x/5e/b5/5e/5eb55ec2482b119c9bb8a207d255b07e.jpg',
-    'isNotificationOn': true,
-    'language': 'TH',
-  };
+  );
 
+  final ImagePicker _picker = ImagePicker();
+
+  /// Picks an image from the gallery and updates the user profile picture.
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedImage = await picker.pickImage(
+    final pickedFile = await _picker.pickImage(
       source: ImageSource.gallery,
       imageQuality: 75,
     );
-
-    if (pickedImage != null) {
+    if (pickedFile != null) {
       setState(() {
-        _userData['profileImageUrl'] = pickedImage.path;
+        _currentUser.profileImagePath = pickedFile.path;
       });
     }
   }
 
+  /// Updates selected language.
   void _changeLanguage(String lang) {
-    setState(() {
-      _userData['language'] = lang;
-    });
+    setState(() => _currentUser.language = lang);
   }
 
-  void _toggleNotification(bool value) {
-    setState(() {
-      _userData['isNotificationOn'] = value;
-    });
+  /// Toggles notification setting.
+  void _toggleNotification(bool enabled) {
+    setState(() => _currentUser.notificationsEnabled = enabled);
   }
 
   @override
@@ -59,82 +74,32 @@ class _AccountPageState extends State<AccountPage> {
       body: Column(
         children: [
           const CustomTopBar(),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 30),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.chevron_left,
-                        color: Color(0xFFA00000),
-                        size: 32,
-                      ),
-                      Text(
-                        "Back",
-                        style: GoogleFonts.montserrat(
-                          color: const Color(0xFFA00000),
-                          fontWeight: FontWeight.w700,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const Icon(
-                  Icons.help_outline,
-                  color: Color(0xFFD55757),
-                  size: 32,
-                ),
-              ],
-            ),
+          _buildHeader(context),
+          Expanded(
+            child: _buildMenuSection(context),
           ),
+        ],
+      ),
+    );
+  }
 
-          // ส่วนแสดงรูปโปรไฟล์
-          Stack(
-            alignment: Alignment.bottomRight,
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 30),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              CircleAvatar(
-                radius: 85,
-                backgroundColor: Colors.white,
-                child: CircleAvatar(
-                  radius: 78,
-                  backgroundImage:
-                      _userData['profileImageUrl'] != null &&
-                              !_userData['profileImageUrl']
-                                  .toString()
-                                  .startsWith('http')
-                          ? Image.file(File(_userData['profileImageUrl'])).image
-                          : NetworkImage(_userData['profileImageUrl'])
-                              as ImageProvider,
-                ),
-              ),
-              Positioned(
-                bottom: 7,
-                right: 7,
-                child: GestureDetector(
-                  onTap: _pickImage,
-                  child: Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    padding: const EdgeInsets.all(10),
-                    child: const Icon(Icons.edit, size: 20, color: Colors.red),
-                  ),
-                ),
-              ),
+              _backButton(context),
+              const Icon(Icons.help_outline, color: Color(0xFFD55757), size: 32),
             ],
           ),
           const SizedBox(height: 20),
-
-          // ส่วนแสดงข้อมูลผู้ใช้จาก Mock Data
+          _profileAvatar(),
+          const SizedBox(height: 20),
           Text(
-            _userData['name'],
+            _currentUser.name,
             style: GoogleFonts.montserrat(
               color: const Color(0xFFA00000),
               fontSize: 23,
@@ -143,108 +108,114 @@ class _AccountPageState extends State<AccountPage> {
           ),
           const SizedBox(height: 5),
           Text(
-            'Student ID: ${_userData['studentId']}',
+            'Student ID: ${_currentUser.studentId}',
             style: const TextStyle(
               color: Colors.white,
               fontSize: 18,
               fontWeight: FontWeight.w900,
             ),
           ),
+        ],
+      ),
+    );
+  }
 
-          // ส่วนเมนู
-          const SizedBox(height: 25),
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(38),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTile(
-                    icon: Icons.person,
-                    title: "Profile",
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ProfilePage(),
-                          ),
-                        ),
-                  ),
-                  const SizedBox(height: 18),
-
-                  _buildLanguageToggle(),
-                  const SizedBox(height: 18),
-
-                  _buildNotificationToggle(),
-                  const SizedBox(height: 18),
-
-                  _buildTile(
-                    icon: Icons.mail,
-                    title: "Contact us",
-                    onTap:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const ContactPage(),
-                          ),
-                        ),
-                  ),
-
-                  const Spacer(),
-
-                  // ปุ่ม Logout
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFF9800),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      onPressed: () async {
-                        bool isLoading = true;
-                        bool result = false;
-
-                        try {
-                          result = await TQauth.logout();
-                        } catch (e) {
-                          // Optionally handle the error, e.g., show a snackbar
-                        } finally {
-                          isLoading = false;
-                        }
-
-                        if (result == true) {
-                          if (context.mounted) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const LoginPage(),
-                              ),
-                            );
-                          }
-                        }
-                      },
-                      child: const Text(
-                        "Logout",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+  Widget _backButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Row(
+        children: [
+          const Icon(Icons.chevron_left, color: Color(0xFFA00000), size: 32),
+          Text(
+            'Back',
+            style: GoogleFonts.montserrat(
+              color: const Color(0xFFA00000),
+              fontWeight: FontWeight.w700,
+              fontSize: 20,
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _profileAvatar() {
+    final isLocal = _currentUser.profileImagePath != null &&
+        !_currentUser.profileImagePath!.startsWith('http');
+    final imageProvider = isLocal
+        ? FileImage(File(_currentUser.profileImagePath!))
+        : NetworkImage(_currentUser.profileImagePath!) as ImageProvider;
+
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        CircleAvatar(
+          radius: 85,
+          backgroundColor: Colors.white,
+          child: CircleAvatar(
+            radius: 78,
+            backgroundImage: imageProvider,
+          ),
+        ),
+        Positioned(
+          bottom: 7,
+          right: 7,
+          child: GestureDetector(
+            onTap: _pickImage,
+            child: Container(
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+              ),
+              padding: const EdgeInsets.all(10),
+              child: const Icon(Icons.edit, size: 20, color: Colors.red),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuSection(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(38),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTile(
+            icon: Icons.person,
+            title: 'Profile',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilePage()),
+            ),
+          ),
+          const SizedBox(height: 18),
+          LanguageToggle(
+            currentLang: _currentUser.language,
+            onChanged: _changeLanguage,
+          ),
+          const SizedBox(height: 18),
+          NotificationToggle(
+            enabled: _currentUser.notificationsEnabled,
+            onChanged: _toggleNotification,
+          ),
+          const SizedBox(height: 18),
+          _buildTile(
+            icon: Icons.mail,
+            title: 'Contact us',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ContactPage()),
+            ),
+          ),
+          const Spacer(),
+          _logoutButton(context),
         ],
       ),
     );
@@ -258,7 +229,7 @@ class _AccountPageState extends State<AccountPage> {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: CircleAvatar(
-        backgroundColor: Color(0xFFFF9D00),
+        backgroundColor: const Color(0xFFFF9D00),
         child: Icon(icon, color: Colors.white),
       ),
       title: Text(
@@ -268,16 +239,51 @@ class _AccountPageState extends State<AccountPage> {
           color: Color(0xFFA00000),
         ),
       ),
-      trailing: const Icon(
-        Icons.arrow_forward_ios,
-        size: 18,
-        color: Color(0xFFA00000),
-      ),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 18, color: Color(0xFFA00000)),
       onTap: onTap,
     );
   }
 
-  Widget _buildLanguageToggle() {
+  Widget _logoutButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFFF9800),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+        ),
+        onPressed: () async {
+          final result = await TQauth.logout().catchError((_) => false);
+          if (result && context.mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const LoginPage()),
+            );
+          }
+        },
+        child: const Text(
+          'Logout',
+          style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
+        ),
+      ),
+    );
+  }
+}
+
+/// A widget to toggle between TH and EN languages.
+class LanguageToggle extends StatelessWidget {
+  final String currentLang;
+  final ValueChanged<String> onChanged;
+
+  const LanguageToggle({
+    Key? key,
+    required this.currentLang,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const CircleAvatar(
@@ -285,36 +291,47 @@ class _AccountPageState extends State<AccountPage> {
         child: Icon(Icons.language, color: Colors.white),
       ),
       title: const Text(
-        "Language",
+        'Language',
         style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFFA00000)),
       ),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
-        children: ["TH", "EN"].map((lang) => _langToggle(lang)).toList(),
+        children: ['TH', 'EN'].map((lang) {
+          final bool isSelected = lang == currentLang;
+          return GestureDetector(
+            onTap: () => onChanged(lang),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFFFF9D00) : Colors.grey[300],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                lang,
+                style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
+}
 
-  Widget _langToggle(String lang) {
-    final isSelected = lang == _userData['language'];
-    return GestureDetector(
-      onTap: () => _changeLanguage(lang),
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFFFF9D00) : Colors.grey[300],
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          lang,
-          style: TextStyle(color: isSelected ? Colors.white : Colors.black),
-        ),
-      ),
-    );
-  }
+/// A widget containing a switch to enable or disable notifications.
+class NotificationToggle extends StatelessWidget {
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
 
-  Widget _buildNotificationToggle() {
+  const NotificationToggle({
+    Key? key,
+    required this.enabled,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: const CircleAvatar(
@@ -322,13 +339,13 @@ class _AccountPageState extends State<AccountPage> {
         child: Icon(Icons.notifications, color: Colors.white),
       ),
       title: const Text(
-        "Notifications",
+        'Notifications',
         style: TextStyle(fontWeight: FontWeight.w900, color: Color(0xFFA00000)),
       ),
       trailing: Switch(
-        value: _userData['isNotificationOn'],
-        activeColor: Color(0xFFFF9D00),
-        onChanged: _toggleNotification,
+        value: enabled,
+        activeColor: const Color(0xFFFF9D00),
+        onChanged: onChanged,
       ),
     );
   }

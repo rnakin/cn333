@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TQauth {
   static Future<bool> logout() async {
@@ -56,6 +57,14 @@ class TQauth {
     }
   }
 
+static Future<void> saveStringToCache(String name,String str) async{
+
+final prefs = await SharedPreferences.getInstance();
+
+// Save the counter value to persistent storage under the 'counter' key.
+await prefs.setString(name, str);
+}
+
   static Future<UserCredential> loginViaID(String id, String password) async {
     String email;
     //Case 1 Known user
@@ -65,6 +74,7 @@ class TQauth {
     try {
       email = await fetchEmail(id);
       final credential = await loginViaEmail(email, password);
+      saveStringToCache("id", id);
       return credential;
     } catch (e) {
       //Case 2 Student, but new user
@@ -74,6 +84,7 @@ class TQauth {
       debugPrint("verified");
       if (personInfoResponse['status'] == true) {
         email = personInfoResponse['email'];
+    // final user = FirebaseAuth.instance.currentUser;
       } else {
         debugPrint("ID verification failed.");
         throw Exception("ID verification failed.");
@@ -85,6 +96,7 @@ class TQauth {
       await saveIdEmailMapping(id, email);
 
       debugPrint("User account created for $email and ID mapping saved.");
+      saveStringToCache("id", id);
       return newCredential;
     } on FirebaseAuthException catch (e) {
       debugPrint(

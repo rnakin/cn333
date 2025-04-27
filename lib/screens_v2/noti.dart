@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:tuquest/screens_v2/noti_create.dart';
 import 'widgets_v2/topbar.dart';
 import 'widgets_v2/navbar.dart';
 import 'widgets_v2/post_card.dart';
@@ -11,43 +14,47 @@ import 'virtual_card.dart';
 class NotiPage extends StatelessWidget {
   const NotiPage({super.key});
 
-  List<Post> _getMockNotifications() {
-    return [
-      Post(
-        id: 'noti_1',
-        topic: 'กิจกรรมรับDoraemon',
-        detail: 'มีการเปลี่ยนแปลงเวลากิจกรรมรับน้องเป็น 10:00 น. โปรดตรวจสอบ',
-        imageUrl: 'https://www.ilovejapantours.com/images/easyblog_articles/6/doraemon-gadget-cat-from-the-future-wallpaper-4.jpg',
-        isNetworkImage: true,
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      Post(
-        id: 'noti_2',
-        topic: 'แจ้งเตือนeiei',
-        detail: 'ค่าหน่วยกิตภาคเรียนที่ 2/2566 ครบกำหนดชำระวันที่ 30 มิ.ย.',
-        imageUrl: 'https://www.mangozero.com/wp-content/uploads/2016/11/conan-high-tech-gadget.jpg',
-        isNetworkImage: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      Post(
-        id: 'noti_3',
-        topic: 'ประกาศผลสอบกลางภาค',
-        detail: 'ผลสอบวิชา Mobile App Development ออกแล้ว',
-        imageUrl: 'assets/google_logo.png',
-        isNetworkImage: true,
-        createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-    ];
+  // 🔵 Fetch notifications from Firestore
+  Stream<List<Post>> _getNotifications() {
+    return FirebaseFirestore.instance
+        .collection('notifications')  // assuming "notifications" is the collection name
+        .orderBy('createdAt', descending: true)  // Order notifications by created time
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Post(
+          id: doc.id,
+          topic: doc['topic'],
+          detail: doc['detail'],
+          imageUrl: doc['imageUrl'],
+          isNetworkImage: doc['isNetworkImage'],
+          createdAt: (doc['createdAt'] as Timestamp).toDate(),
+        );
+      }).toList();
+    });
+  }
+
+  // 🔵 Check if user is an admin
+  Future<bool> _isAdmin() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')  // Assuming 'users' collection
+          .doc(user.uid)
+          .get();
+
+      // Check if the user document exists and has 'role' field as 'admin'
+      return userDoc.exists && userDoc.data()?['role'] == 'admin';
+    }
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
-    final mockNotifications = _getMockNotifications();
-
     return Scaffold(
       backgroundColor: const Color(0xFFFF9D00),
       appBar: const CustomTopBar(),
-      bottomNavigationBar: const CustomNavBar(),
+
       body: GestureDetector(
         onVerticalDragEnd: (d) {
           if (d.primaryVelocity! > 300) {
@@ -96,18 +103,27 @@ class NotiPage extends StatelessWidget {
                                 color: Color(0xFFFF8000),
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.search, color: Color(0xFFFF8000)),
-                              onPressed: () {},
-                            ),
                           ],
                         ),
                       ),
                       
                       // Notification List
                       Expanded(
-                        child: mockNotifications.isEmpty
-                            ? Center(
+                        child: StreamBuilder<List<Post>>(
+                          stream: _getNotifications(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return const Center(child: CircularProgressIndicator());
+                            }
+
+                            if (snapshot.hasError) {
+                              return Center(
+                                child: Text('Error: ${snapshot.error}'),
+                              );
+                            }
+
+                            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return Center(
                                 child: Text(
                                   'ไม่มีการแจ้งเตือน',
                                   style: GoogleFonts.montserrat(
@@ -115,34 +131,75 @@ class NotiPage extends StatelessWidget {
                                     color: Colors.grey[600],
                                   ),
                                 ),
-                              )
-                            : ListView.builder(
-                                padding: const EdgeInsets.symmetric(horizontal: 20),
-                                itemCount: mockNotifications.length,
-                                itemBuilder: (context, index) {
-                                  final post = mockNotifications[index];
-                                  return Column(
-                                    children: [
-                                      PostCard(
-                                        post: post,
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => PostDetailPage.fromPost(post: post),
-                                          ),
+                              );
+                            }
+
+                            final notifications = snapshot.data!;
+
+                            return ListView.builder(
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              itemCount: notifications.length,
+                              itemBuilder: (context, index) {
+                                final post = notifications[index];
+                                return Column(
+                                  children: [
+                                    PostCard(
+                                      post: post,
+                                      onTap: () => Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => PostDetailPage.fromPost(post: post),
                                         ),
                                       ),
-                                      if (index != mockNotifications.length - 1)
-                                        const SizedBox(height: 12),
-                                    ],
-                                  );
-                                },
-                              ),
+                                    ),
+                                    if (index != notifications.length - 1)
+                                      const SizedBox(height: 12),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
                       ),
+                                    FutureBuilder<bool>(
+                future: _isAdmin(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(); // Loading state, no button
+                  }
+
+                  if (snapshot.hasData && snapshot.data!) {
+                    // Display the '+' button for admins
+                    return Positioned(
+                      bottom: 50,
+                      right: 0,
+                      child: FloatingActionButton(
+                        onPressed: () {
+                          // Navigate to the admin notification page
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const AdminNotiPage()),  // Replace with actual page
+                          );
+                        },
+                        backgroundColor: const Color(0xFFFF8000),
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                      ),
+                    );
+                  }
+
+                  return const SizedBox(); // If not admin, no button
+                },
+              ),
                     ],
                   ),
+                  
                 ),
               ),
+              // Admin Check and Floating Button
+
             ],
           ),
         ),
