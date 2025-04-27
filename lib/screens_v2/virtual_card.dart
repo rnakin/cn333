@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:barcode_widget/barcode_widget.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:tuquest/caching.dart';
+import 'package:tuquest/screens_v2/widgets_v2/qrWidget.dart';
+
 
 class VirtualCardPage extends StatefulWidget {
   final VoidCallback onBackToTop;
@@ -83,35 +82,13 @@ class _VirtualCardPageState extends State<VirtualCardPage> {
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
-                              QrImageView(
-                                data:
-                                    studentId, // ใช้รหัสนักศึกษาเป็นข้อมูลใน QR Code
-                                version: QrVersions.auto,
-                                size: 200,
-                                backgroundColor: Colors.white,
-                                eyeStyle: const QrEyeStyle(
-                                  eyeShape: QrEyeShape.square,
-                                  color: Colors.black,
-                                ),
-                                dataModuleStyle: const QrDataModuleStyle(
-                                  dataModuleShape: QrDataModuleShape.square,
-                                  color: Colors.black,
-                                ),
-                              ),
-
+                              // Use QRCodeWidget to display the QR code
+                              QRCodeWidget(data: studentId),
                             ],
                           ),
                         ),
 
                         const SizedBox(height: 24),
-
-                        // Barcode ที่สามารถสแกนได้จริง
-                  
-
-                        const SizedBox(height: 20),
-
-                        const SizedBox(height: 8),
-
                       ],
                     ),
                   ),

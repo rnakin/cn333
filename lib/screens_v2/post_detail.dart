@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -69,7 +70,6 @@ class PostDetailPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFF9D00),
       appBar: const CustomTopBar(),
-      bottomNavigationBar: const CustomNavBar(),
       body: GestureDetector(
         onVerticalDragEnd: (d) {
           if (d.primaryVelocity! > 200) {
@@ -271,6 +271,7 @@ class PostDetailPage extends StatelessWidget {
         createdAt: createdAt ?? DateTime.now(),
         startDate: startDate!,
         endDate: endDate!,
+        creatorUID: FirebaseAuth.instance.currentUser?.uid ?? '',
       );
     } else {
       return Post(
@@ -280,6 +281,7 @@ class PostDetailPage extends StatelessWidget {
         imageUrl: imageUrl ?? '',
         isNetworkImage: isNetworkImage,
         createdAt: createdAt ?? DateTime.now(),
+        creatorUID: FirebaseAuth.instance.currentUser?.uid ?? '',
       );
     }
   }
