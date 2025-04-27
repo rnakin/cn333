@@ -12,7 +12,7 @@ android {
     namespace = "com.example.tuquest"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
-    
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -21,8 +21,11 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
-    
+
     defaultConfig {
+        // Increment the versionCode with each release
+        versionCode = flutter.versionCode.toInt()
+        versionName = flutter.versionName
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.tuquest"
         // You can update the following values to match your application needs.
@@ -39,7 +42,7 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
