@@ -128,18 +128,16 @@ class _SchedulePageState extends State<SchedulePage> {
                     // Update existing schedule
                     await firestore
                         .collection('schedule')
-                        .doc(
-                          userId,
-                        ) // Ensure the user's own schedule is updated
-                        .collection('items')
+                        .doc(userId)
+                        .collection(selectedDay)
                         .doc(doc.id)
                         .set(newClass);
                   } else {
                     // Add new schedule
                     await firestore
                         .collection('schedule')
-                        .doc(selectedDay)
-                        .collection('items')
+                        .doc(userId)
+                        .collection(selectedDay)
                         .add(newClass);
                   }
 
@@ -263,16 +261,8 @@ class _SchedulePageState extends State<SchedulePage> {
                             stream:
                                 firestore
                                     .collection('schedule')
-                                    .doc(selectedDay)
-                                    .collection('items')
-                                    .where(
-                                      'userId',
-                                      isEqualTo:
-                                          FirebaseAuth
-                                              .instance
-                                              .currentUser
-                                              ?.uid,
-                                    ) // Add this filter
+                                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                                    .collection(selectedDay)
                                     .snapshots(),
                             builder: (context, snapshot) {
                               if (snapshot.connectionState ==
