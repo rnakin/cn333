@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tuquest/auth.dart';
+import 'package:tuquest/screens_v2/login.dart';
 import '../noti.dart';
 
 class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
@@ -28,12 +30,13 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
       shadowColor: Colors.black.withOpacity(0.05),
       surfaceTintColor: backgroundColor,
       automaticallyImplyLeading: false,
-      leading: showBackButton
-          ? IconButton(
-              icon: Icon(Icons.arrow_back, color: textColor),
-              onPressed: onBackPressed ?? () => Navigator.pop(context),
-            )
-          : null,
+      leading:
+          showBackButton
+              ? IconButton(
+                icon: Icon(Icons.arrow_back, color: textColor),
+                onPressed: onBackPressed ?? () => Navigator.pop(context),
+              )
+              : null,
       title: Text(
         title,
         style: GoogleFonts.montserrat(
@@ -42,23 +45,56 @@ class CustomTopBar extends StatelessWidget implements PreferredSizeWidget {
           color: textColor,
         ),
       ),
-      //centerTitle: true,
-      actions: showNotificationIcon
-          ? [
-              Icon(Icons.chat_bubble_outline, color: Colors.red[200]),
-              const SizedBox(width: 16),
-              IconButton(
-                icon: Icon(Icons.notifications_none, color: textColor),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const NotiPage()),
-                  );
-                },
-              ),
-              const SizedBox(width: 10),
-            ]
-          : null,
+      actions:
+          showNotificationIcon
+              ? [
+                Icon(Icons.chat_bubble_outline, color: Colors.red[200]),
+                const SizedBox(width: 16),
+                IconButton(
+                  icon: Icon(Icons.notifications_none, color: textColor),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const NotiPage()),
+                    );
+                  },
+                ),
+                const SizedBox(width: 10),
+                // Add the menu with Logout option
+                PopupMenuButton<String>(
+                  icon: Icon(Icons.more_vert, color: textColor),
+                  onSelected: (value) {
+                    if (value == 'logout') {
+                      // Call logout function when 'logout' is selected
+                      TQauth.logout();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                      );
+                    }
+                  },
+                  itemBuilder: (BuildContext context) {
+                    return [
+                      PopupMenuItem<String>(
+                        value: 'logout',
+                        child: Row(
+                          children: [
+                            Icon(Icons.logout, color: Colors.black),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Logout',
+                              style: GoogleFonts.montserrat(
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ];
+                  },
+                ),
+              ]
+              : null,
     );
   }
 
