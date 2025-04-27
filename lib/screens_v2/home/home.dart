@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../widgets_v2/topbar.dart';
-import '../widgets_v2/navbar.dart';
 import '../widgets_v2/announce_card.dart';
 import '../widgets_v2/calendar.dart';
 import '../widgets_v2/listpost.dart';
@@ -53,7 +51,6 @@ class _HomePageState extends State<HomePage> {
       ),
       child: ListView(
         controller: _scrollController,
-        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.symmetric(vertical: 24),
         children: [
           const Padding(
@@ -77,7 +74,7 @@ class _HomePageState extends State<HomePage> {
       appBar: const CustomTopBar(),
       body: PageView(
         controller: _pageController,
-        physics: const BouncingScrollPhysics(),
+
         onPageChanged: (index) {
           setState(() => _currentIndex = index);
         },
@@ -113,7 +110,7 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.credit_card),
-            label: 'Card',
+            label: 'QR',
           ),
         ],
       ),
