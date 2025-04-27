@@ -7,7 +7,7 @@ import 'package:tuquest/screens_v2/noti_create.dart';
 import 'widgets_v2/topbar.dart';
 import 'widgets_v2/navbar.dart';
 import 'widgets_v2/post_card.dart';
-import 'models/post_model.dart';
+import 'models/model.dart';
 import 'post_detail.dart';
 import 'virtual_card.dart';
 

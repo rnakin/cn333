@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -14,17 +16,46 @@ class CalendarSection extends StatefulWidget {
 class _CalendarSectionState extends State<CalendarSection> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
+  late FirebaseFirestore _firestore;
+  late FirebaseAuth _auth;
+  bool _isAdmin = false;
 
-  // Mock event list
-  final List<DateTime> _eventDays = [
-    DateTime.utc(2025, 2, 2),
-    DateTime.utc(2025, 2, 21),
-    DateTime.utc(2025, 2, 26),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _firestore = FirebaseFirestore.instance;
+    _auth = FirebaseAuth.instance;
 
-  // สำหรับให้ TableCalendar สร้าง marker
+    // Check if user is admin
+    _checkIfAdmin();
+  }
+
+  // Check if the current user is an admin
+  Future<void> _checkIfAdmin() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data()?['role'] == 'admin') {
+        setState(() {
+          _isAdmin = true;
+        });
+      }
+    }
+  }
+
+  // Fetch events from Firestore for a specific day
   List<dynamic> _getEventsForDay(DateTime day) {
-    return _eventDays.where((d) => isSameDay(d, day)).toList();
+    List<dynamic> events = [];
+    _firestore
+        .collection('events')
+        .where('date', isEqualTo: day.toIso8601String())
+        .get()
+        .then((QuerySnapshot snapshot) {
+      snapshot.docs.forEach((doc) {
+        events.add(doc.data());
+      });
+    });
+    return events;
   }
 
   @override
@@ -35,7 +66,7 @@ class _CalendarSectionState extends State<CalendarSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // หัวข้อด้านบน
+        // Header
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 8),
           child: Text(
@@ -48,7 +79,7 @@ class _CalendarSectionState extends State<CalendarSection> {
           ),
         ),
 
-        // กล่องปฏิทิน
+        // Calendar Box
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
           padding: const EdgeInsets.all(24),
@@ -58,7 +89,7 @@ class _CalendarSectionState extends State<CalendarSection> {
           ),
           child: Column(
             children: [
-              // Header (เดือน)
+              // Header (Month)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Row(
@@ -100,7 +131,7 @@ class _CalendarSectionState extends State<CalendarSection> {
                 ),
               ),
 
-              // ปฏิทิน
+              // TableCalendar
               TableCalendar(
                 firstDay: DateTime.utc(2020, 1, 1),
                 lastDay: DateTime.utc(2030, 12, 31),
@@ -166,6 +197,15 @@ class _CalendarSectionState extends State<CalendarSection> {
                   ),
                 ),
               ),
+
+              // Add Event Button (only for admin)
+              if (_isAdmin)
+                IconButton(
+                  icon: const Icon(Icons.add, color: Colors.black),
+                  onPressed: () {
+                    _addEvent();
+                  },
+                ),
             ],
           ),
         ),
@@ -173,7 +213,14 @@ class _CalendarSectionState extends State<CalendarSection> {
     );
   }
 
-  // ชื่อเดือนภาษาไทย
+  // Add a new event
+  void _addEvent() {
+    // Here you can navigate to a page or show a dialog to add an event
+    // For now, we'll just show a simple message.
+    print('Add Event button pressed!');
+  }
+
+  // Thai month names
   String _monthName(int month) {
     const monthNames = [
       '',

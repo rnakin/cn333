@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/post_model.dart'; // แก้ path ให้ถูกต้อง
+import '../models/model.dart';
 
 class FavProvider with ChangeNotifier {
   final List<Post> _favoritePosts = [];

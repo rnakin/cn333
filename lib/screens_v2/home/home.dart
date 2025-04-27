@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets_v2/topbar.dart';
 import '../widgets_v2/announce_card.dart';
 import '../widgets_v2/calendar.dart';
-import '../widgets_v2/listpost.dart';
+import '../widgets_v2/listevent.dart';
 import '../schedule_page.dart';
 import '../virtual_card.dart';
 
@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 16),
           CalendarSection(onDateSelected: _onDateSelected),
           const SizedBox(height: 16),
-          ListPostSection(selectedDate: _selectedDate),
+          ListEventSection(selectedDate: _selectedDate),
           const SizedBox(height: 100),
         ],
       ),

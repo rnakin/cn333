@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'widgets_v2/topbar.dart';
-import 'models/post_model.dart';
+import 'models/model.dart';
 import 'providers/fav_provider.dart';
 import 'widgets_v2/post_card.dart';
 import 'widgets_v2/navbar.dart';

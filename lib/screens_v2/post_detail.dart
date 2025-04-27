@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'widgets_v2/topbar.dart';
 import 'providers/fav_provider.dart';
-import 'models/post_model.dart';
+import 'models/model.dart';
 import 'widgets_v2/navbar.dart';
 import 'virtual_card.dart';
 
@@ -15,6 +15,8 @@ class PostDetailPage extends StatelessWidget {
   final String? imageUrl;
   final bool isNetworkImage;
   final DateTime? createdAt;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final String? id;
 
   const PostDetailPage({
@@ -24,22 +26,39 @@ class PostDetailPage extends StatelessWidget {
     this.imageUrl,
     this.isNetworkImage = true,
     this.createdAt,
+    this.startDate,
+    this.endDate,
     this.id,
   });
 
+  /// Smart constructor from Post or Event
   factory PostDetailPage.fromPost({
     Key? key,
     required Post post,
   }) {
-    return PostDetailPage(
-      key: key,
-      title: post.topic,
-      description: post.detail,
-      imageUrl: post.imageUrl,
-      isNetworkImage: post.isNetworkImage ?? true,
-      createdAt: post.createdAt,
-      id: post.id,
-    );
+    if (post is Event) {
+      return PostDetailPage(
+        key: key,
+        title: post.topic,
+        description: post.detail,
+        imageUrl: post.imageUrl,
+        isNetworkImage: post.isNetworkImage,
+        createdAt: post.createdAt,
+        startDate: post.startDate,
+        endDate: post.endDate,
+        id: post.id,
+      );
+    } else {
+      return PostDetailPage(
+        key: key,
+        title: post.topic,
+        description: post.detail,
+        imageUrl: post.imageUrl,
+        isNetworkImage: post.isNetworkImage,
+        createdAt: post.createdAt,
+        id: post.id,
+      );
+    }
   }
 
   @override
@@ -69,7 +88,6 @@ class PostDetailPage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 50),
-              // White Container
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -85,14 +103,12 @@ class PostDetailPage extends StatelessWidget {
                   ),
                   child: Column(
                     children: [
-                      // Scrollable Content
                       Expanded(
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Header with Favorite button
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -101,7 +117,7 @@ class PostDetailPage extends StatelessWidget {
                                     style: GoogleFonts.montserrat(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFFFF8000),
+                                      color: const Color(0xFFFF8000),
                                     ),
                                   ),
                                   IconButton(
@@ -124,13 +140,12 @@ class PostDetailPage extends StatelessWidget {
                                 ],
                               ),
                               const SizedBox(height: 16),
-                              
-                              // Image section
+
                               if (imageUrl?.isNotEmpty ?? false)
                                 _buildImageWidget(),
+
                               const SizedBox(height: 16),
-                              
-                              // Title
+
                               Text(
                                 title,
                                 style: GoogleFonts.montserrat(
@@ -138,20 +153,35 @@ class PostDetailPage extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              
-                              // Date
+
                               if (createdAt != null) ...[
                                 const SizedBox(height: 8),
                                 Text(
-                                  "วันที่: ${DateFormat('d MMM yyyy', 'th_TH').format(createdAt!)}",
+                                  "วันที่โพสต์: ${DateFormat('d MMM yyyy', 'th_TH').format(createdAt!)}",
                                   style: GoogleFonts.montserrat(
                                     color: Colors.grey[600],
                                   ),
                                 ),
                               ],
+
+                              if (startDate != null && endDate != null) ...[
+                                const SizedBox(height: 8),
+                                Text(
+                                  "เริ่ม: ${DateFormat('d MMM yyyy', 'th_TH').format(startDate!)}",
+                                  style: GoogleFonts.montserrat(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                Text(
+                                  "สิ้นสุด: ${DateFormat('d MMM yyyy', 'th_TH').format(endDate!)}",
+                                  style: GoogleFonts.montserrat(
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+
                               const SizedBox(height: 16),
-                              
-                              // Description
+
                               Text(
                                 description,
                                 style: GoogleFonts.montserrat(
@@ -162,22 +192,15 @@ class PostDetailPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      
-                      // Back Button at bottom
+
                       Padding(
-                        padding: const EdgeInsets.only(
-                          left: 20,
-                          right: 20,
-                          bottom: 20,
-                          top: 10,
-                        ),
+                        padding: const EdgeInsets.all(20),
                         child: SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: () => Navigator.pop(context),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFFF8000),
-                              foregroundColor: Color(0xFFFF8000),
+                              backgroundColor: const Color(0xFFFF8000),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -238,13 +261,26 @@ class PostDetailPage extends StatelessWidget {
   }
 
   Post _toPost() {
-    return Post(
-      id: id ?? DateTime.now().toString(),
-      topic: title,
-      detail: description,
-      imageUrl: imageUrl ?? '',
-      isNetworkImage: isNetworkImage,
-      createdAt: createdAt ?? DateTime.now(),
-    );
+    if (startDate != null && endDate != null) {
+      return Event(
+        id: id ?? DateTime.now().toIso8601String(),
+        topic: title,
+        detail: description,
+        imageUrl: imageUrl ?? '',
+        isNetworkImage: isNetworkImage,
+        createdAt: createdAt ?? DateTime.now(),
+        startDate: startDate!,
+        endDate: endDate!,
+      );
+    } else {
+      return Post(
+        id: id ?? DateTime.now().toIso8601String(),
+        topic: title,
+        detail: description,
+        imageUrl: imageUrl ?? '',
+        isNetworkImage: isNetworkImage,
+        createdAt: createdAt ?? DateTime.now(),
+      );
+    }
   }
 }
