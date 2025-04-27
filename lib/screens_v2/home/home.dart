@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tuquest/screens_v2/fav.dart';
+import 'package:tuquest/screens_v2/providers/fav_provider.dart';
 import '../widgets_v2/topbar.dart';
 import '../widgets_v2/announce_card.dart';
 import '../widgets_v2/calendar.dart';
@@ -18,6 +21,11 @@ class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
   int _currentIndex = 0;
   DateTime _selectedDate = DateTime.now();
+
+  Future<void> _loadFavorites() async {
+    final favProvider = Provider.of<FavProvider>(context, listen: false);
+    await favProvider.loadFromFirebase();
+  }
 
   void _onDateSelected(DateTime date) {
     setState(() {
@@ -74,7 +82,6 @@ class _HomePageState extends State<HomePage> {
       appBar: const CustomTopBar(),
       body: PageView(
         controller: _pageController,
-
         onPageChanged: (index) {
           setState(() => _currentIndex = index);
         },
@@ -89,6 +96,7 @@ class _HomePageState extends State<HomePage> {
               _pageController.jumpToPage(0);
             },
           ),
+          const FavPage(),  // Add FavPage as a new tab
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -111,6 +119,10 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.credit_card),
             label: 'QR',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorites',  // New label for the Favorites tab
           ),
         ],
       ),
