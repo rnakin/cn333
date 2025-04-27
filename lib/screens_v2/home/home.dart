@@ -15,11 +15,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final PageController _pageController = PageController();
   final ScrollController _scrollController = ScrollController();
   int _currentIndex = 0;
   DateTime _selectedDate = DateTime.now();
-
 
   void _onDateSelected(DateTime date) {
     setState(() {
@@ -28,11 +26,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _onNavTapped(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
     setState(() {
       _currentIndex = index;
     });
@@ -40,7 +33,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
-    _pageController.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -74,11 +66,8 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFF9D00),
       appBar: const CustomTopBar(),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() => _currentIndex = index);
-        },
+      body: IndexedStack(
+        index: _currentIndex,
         children: [
           Padding(
             padding: const EdgeInsets.only(top: 50),
@@ -87,10 +76,12 @@ class _HomePageState extends State<HomePage> {
           const SchedulePage(),
           VirtualCardPage(
             onBackToTop: () {
-              _pageController.jumpToPage(0);
+              setState(() {
+                _currentIndex = 0;
+              });
             },
           ),
-          const FavPage(),  // Add FavPage as a new tab
+          const FavPage(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -116,7 +107,7 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
-            label: 'Favorites',  // New label for the Favorites tab
+            label: 'Favorites',
           ),
         ],
       ),
