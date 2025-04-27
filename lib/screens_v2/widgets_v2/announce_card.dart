@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:tuquest/auth.dart';
 import 'package:tuquest/screens_v2/AddAnnouncementPage.dart';
 import '../post_detail.dart';

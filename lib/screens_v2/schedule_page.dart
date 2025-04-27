@@ -132,7 +132,7 @@ class _SchedulePageState extends State<SchedulePage> {
                           userId,
                         ) // Ensure the user's own schedule is updated
                         .collection('items')
-                        .doc(doc!.id)
+                        .doc(doc.id)
                         .set(newClass);
                   } else {
                     // Add new schedule

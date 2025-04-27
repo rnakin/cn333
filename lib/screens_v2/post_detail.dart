@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'widgets_v2/topbar.dart';
 import 'providers/fav_provider.dart';
 import 'models/model.dart';
-import 'widgets_v2/navbar.dart';
 import 'virtual_card.dart';
 
 class PostDetailPage extends StatelessWidget {

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:tuquest/screens_v2/fav.dart';
-import 'package:tuquest/screens_v2/providers/fav_provider.dart';
 import '../widgets_v2/topbar.dart';
 import '../widgets_v2/announce_card.dart';
 import '../widgets_v2/calendar.dart';
@@ -22,10 +20,6 @@ class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
   DateTime _selectedDate = DateTime.now();
 
-  Future<void> _loadFavorites() async {
-    final favProvider = Provider.of<FavProvider>(context, listen: false);
-    await favProvider.loadFromFirebase();
-  }
 
   void _onDateSelected(DateTime date) {
     setState(() {

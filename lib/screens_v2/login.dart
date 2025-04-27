@@ -4,7 +4,6 @@ import './home/home.dart';
 import 'package:tuquest/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tuquest/material/validator.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

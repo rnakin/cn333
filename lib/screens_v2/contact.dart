@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'widgets_v2/topbar.dart';
-import 'account.dart';
 
 class ContactPage extends StatefulWidget {
   const ContactPage({super.key});

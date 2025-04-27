@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'account.dart'; 
 import 'widgets_v2/topbar.dart'; 
 
 class ProfilePage extends StatelessWidget {
